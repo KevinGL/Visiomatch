@@ -34,3 +34,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+visiomatch-cf5e1-firebase-adminsdk-uaysq-b337d09def.json
