@@ -12,6 +12,9 @@ const handler = NextAuth({
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
+        gender: { label: "Gender", type: "text" },
+        search: { label: "Search", type: "text" },
+        birthdate: { label: "Birthdate", type: "date" },
       },
       async authorize(credentials) {
         // Valider les informations de connexion ici
@@ -26,14 +29,16 @@ const handler = NextAuth({
         {
             const hashedPassword = await bcrypt.hash(credentials?.password as string, 10);
             
-            const newDoc = await db.collection('users').add({
-                //name: 'John Doe',
+            await db.collection("users").add({
                 email: credentials?.email,
                 password: hashedPassword,
-                createdAt: admin.firestore.FieldValue.serverTimestamp()
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                gender: credentials?.gender,
+                search: credentials?.search,
+                birthdate: credentials?.birthdate
               });
 
-              return newDoc;
+              return { email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate };
         }
 
         else
@@ -46,11 +51,12 @@ const handler = NextAuth({
             }
         }
 
-        return user;
+        return { email: user.email, gender: user.gender, search: user.search, birthdate: user.birthdate };
       },
     }),
   ],
-  secret: process.env.NEXTAUTH_SECRET,
+
+  secret: process.env.NEXTAUTH_SECRET
 });
 
 export { handler as GET, handler as POST }
