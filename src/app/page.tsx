@@ -96,7 +96,7 @@ export default function Home()
       {
         content = (
         <>
-          <select onChange={(e) => setGender(e.target.value)}>
+          <select onChange={(e) => setGender(e.target.value)} value={gender}>
             <option value="">Je suis</option>
             <option value="man">Un homme</option>
             <option value="woman">Une femme</option>
@@ -118,7 +118,7 @@ export default function Home()
       {
         content = (
         <>
-          <select onChange={(e) => setSearch(e.target.value)}>
+          <select onChange={(e) => setSearch(e.target.value)} value={search}>
             <option value="">Je cherche</option>
             <option value="man">Un homme</option>
             <option value="woman">Une femme</option>
@@ -173,8 +173,14 @@ export default function Home()
               redirect: false,
               email,
               password
-            })}>S'inscrire
+            }).then((res) => {
+              if(!res?.ok)
+              {
+                setError("Mauvais mot de passe");
+              }
+            })}>Se connecter
           </button>
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </>)
     }
   }
