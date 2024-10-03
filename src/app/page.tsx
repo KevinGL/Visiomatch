@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { checkExists } from './actions/checkExists';
 import { useEffect, useState } from 'react';
 import { setServers } from 'dns';
+import { Home } from './components/Home';
 
-export default function Home()
+export default function main()
 {
   const [email, setEmail] = useState("");
   const [birthdate, setBirthdate] = useState("");
@@ -44,7 +45,7 @@ export default function Home()
 
   if (status === "authenticated")
   {
-    content = (<button onClick={() => signOut()}>Se déconnecter</button>);
+    content = <Home />
   }
 
   else

@@ -27,6 +27,18 @@ const handler = NextAuth({
 
         if(!user)
         {
+            const birth = new Date(credentials?.birthdate as string);
+            const timestamp = birth.getTime();
+
+            const dateMax = new Date();
+            dateMax.setFullYear(dateMax.getFullYear() - 18);
+            const timestampMax = dateMax.getTime();
+
+            if(timestamp > timestampMax)
+            {
+                return null;
+            }
+            
             const hashedPassword = await bcrypt.hash(credentials?.password as string, 10);
             
             await db.collection("users").add({
