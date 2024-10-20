@@ -53,20 +53,22 @@ export default function main()
     if (step === 0)
     {
       content = (
-        <>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <input
             type="email"
             placeholder="Entrez adresse email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button onClick={() =>
             {
               checkExists(email).then((res) => setAccountExists(res));
               setStep(1);
             }
-          }>Suivant</button>
-        </>
+          }
+          className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant</button>
+        </div>
       );
     }
 
@@ -76,19 +78,21 @@ export default function main()
       if(step == 1)
       {
         content = (
-          <>
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
             <input
               type="date"
               placeholder="Entrez date de naissance"
               onChange={(e) => setBirthdate(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <button onClick={() =>
               {
                 checkBirthdate();
               }
-            }>Suivant</button>
+            }
+            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant</button>
             {error && <p style={{ color: "red" }}>{error}</p>}
-          </>
+          </div>
         );
       }
 
@@ -96,8 +100,8 @@ export default function main()
       if(step == 2)
       {
         content = (
-        <>
-          <select onChange={(e) => setGender(e.target.value)} value={gender}>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <select onChange={(e) => setGender(e.target.value)} value={gender} className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <option value="">Je suis</option>
             <option value="man">Un homme</option>
             <option value="woman">Une femme</option>
@@ -109,17 +113,18 @@ export default function main()
                   setStep(3);
                 }
               }
-            }>Suivant
+            }
+            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
           </button>
-        </>)
+        </div>)
       }
 
       else
       if(step == 3)
       {
         content = (
-        <>
-          <select onChange={(e) => setSearch(e.target.value)} value={search}>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
+          <select onChange={(e) => setSearch(e.target.value)} value={search} className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <option value="">Je cherche</option>
             <option value="man">Un homme</option>
             <option value="woman">Une femme</option>
@@ -131,20 +136,22 @@ export default function main()
                   setStep(4);
                 }
               }
-            }>Suivant
+            }
+            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
           </button>
-        </>)
+        </div>)
       }
 
       else
       if(step == 4)
       {
         content = (
-        <>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <input
             type="password"
-            placeholder="***************"
+            placeholder="Mot de passe ?"
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button onClick={() => signIn("credentials",
             {
@@ -154,20 +161,22 @@ export default function main()
               gender,
               search,
               birthdate
-            })}>S'inscrire
+            })}
+            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">S'inscrire
           </button>
-        </>)
+        </div>)
       }
     }
 
     else
     {
       content = (
-        <>
+        <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <input
             type="password"
-            placeholder="***************"
+            placeholder="Mot de passe ?"
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <button onClick={() => signIn("credentials",
             {
@@ -179,14 +188,17 @@ export default function main()
               {
                 setError("Mauvais mot de passe");
               }
-            })}>Se connecter
+            })}
+            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Se connecter
           </button>
           {error && <p style={{ color: "red" }}>{error}</p>}
-        </>)
+        </div>)
     }
   }
 
   return (
-    content
+    <div className="bg-pink-50">
+      {content}
+    </div>
   );
 }

@@ -5,10 +5,13 @@ import Disconnect from "../components/Disconnect";
 import { getMeetings } from "../actions/getMeetings";
 import { useEffect, useState } from "react";
 import { Meeting } from "../types";
+import { useSession } from "next-auth/react";
+import AuthGuard from "../components/AuthGuard";
 
 const Search = () =>
 {
     const router = useRouter();
+    const { data: session, status } = useSession();
     
     const [meetings, setMeetings] = useState<Meeting[]>([]);
 
@@ -19,11 +22,9 @@ const Search = () =>
             setMeetings(JSON.parse(res));
         });
     }, []);
-
-    //console.log(sessions);
     
     return (
-        <>
+        <AuthGuard>
             <div>
                 <button onClick={() => router.push("/") }>Accueil</button>
             </div>
@@ -38,7 +39,7 @@ const Search = () =>
             </ul>
 
             <Disconnect />
-        </>
+        </AuthGuard>
     );
 }
 
