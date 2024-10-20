@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Disconnect from "./Disconnect";
+import Navbar from "./navbar";
 
 export const Home = () =>
 {
@@ -9,11 +10,7 @@ export const Home = () =>
     
     return (
         <>
-            <div>
-                <button onClick={() => router.push("/search") }>Trouver une séance visio</button>
-            </div>
-
-            <Disconnect />
+            <Navbar />
         </>
     );
 }

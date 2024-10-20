@@ -56,7 +56,7 @@ export default function main()
         <div className="flex flex-col items-center justify-center min-h-screen p-4">
           <input
             type="email"
-            placeholder="Entrez adresse email"
+            placeholder="Entrez votre adresse email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -197,7 +197,7 @@ export default function main()
   }
 
   return (
-    <div className="bg-pink-50">
+    <div className="bg-blue-200 min-h-screen">
       {content}
     </div>
   );
