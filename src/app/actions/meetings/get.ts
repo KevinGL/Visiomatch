@@ -2,15 +2,15 @@
 
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/authOptions";
+import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
 
-export const getMeetings = async () =>
+export const getMeetingsFiltered = async () =>
 {
     const session = await getServerSession(authOptions);
     
     if(!session)
     {
-        return [];
+        return "";
     }
 
     //console.log(session.user.id);
@@ -20,14 +20,18 @@ export const getMeetings = async () =>
 
     if(!currentUser.exists)
     {
-        return [];
+        return "";
     }
     
     const meetingsSnapshot = await db.collection("meetings").get();
 
     const meetings: any[] = meetingsSnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        age: doc.data().age,
+        orientation: doc.data().orientation,
+        participants: doc.data().participants,
+        region: doc.data().region,
+        date: new Date(doc.data().date._seconds * 1000)
     }));
 
     //console.log(currentUser.data());
@@ -41,7 +45,9 @@ export const getMeetings = async () =>
             orientation = "man_woman";
         }
 
-        return m.orientation == orientation;
+        const date = new Date(m.date);
+
+        return m.orientation == orientation && date.getTime() > Date.now();
     });
 
     return JSON.stringify(meetingsFiltered);

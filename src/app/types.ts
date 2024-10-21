@@ -10,7 +10,8 @@ export interface User
 
 export interface Meeting
 {
-    date: Date
+    id: string,
+    date: Date,
     orientation: string,
     region: string,
     age: string,
