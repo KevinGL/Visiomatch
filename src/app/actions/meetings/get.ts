@@ -52,3 +52,27 @@ export const getMeetingsFiltered = async () =>
 
     return JSON.stringify(meetingsFiltered);
 }
+
+export const getMeetingById = async (id: string) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    //console.log(session.user.id);
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return "";
+    }
+    
+    const meetingsSnapshot = db.collection("meetings").doc(id);
+
+    return JSON.stringify((await meetingsSnapshot.get()).data());
+}

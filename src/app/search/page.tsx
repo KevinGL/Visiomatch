@@ -2,13 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import Disconnect from "../components/Disconnect";
-import { getMeetingsFiltered } from "../actions/meetings/get";
 import { useEffect, useState } from "react";
 import { Meeting } from "../types";
 import { useSession } from "next-auth/react";
 import AuthGuard from "../components/AuthGuard";
 import Navbar from "../components/navbar";
 import Image from 'next/image';
+import { getMeetingsFiltered } from "../actions/meetings/get";
 import { addCurrentuserToMeeting } from "../actions/meetings/post";
 
 const Search = () =>
@@ -101,37 +101,23 @@ const Search = () =>
 
                                 //console.log(subscribed);
                                 
-                                return <div key={index} className="flex items-center w-full h-48 mt-10">
+                                return <div key={index} className="flex items-center w-full h-48 mt-10 cursor-pointer hover:bg-blue-300 rounded-lg" onClick={() => router.push(`/view_meeting/${s.id}`)}>
                                     <div className="w-1/3">
                                         <Image
                                             src={path}
                                             alt="Logo"
-                                            width={300}
-                                            height={300}
+                                            width={250}
+                                            height={250}
                                             layout="intrinsic"
                                             className="rounded-lg"
                                         />
                                     </div>
                                     
-                                    <div className="w-1/3 pl-4 space-y-2">
-                                        <h1 className="text-xl font-bold">{`Le ${days[date.getDay()]} ${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")} à ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`}</h1>
+                                    <div className="w-2/3 pl-4 space-y-2">
+                                        <h1 className="sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold">{`Le ${days[date.getDay()]} ${date.getDate().toString().padStart(2, "0")}/${(date.getMonth() + 1).toString().padStart(2, "0")} à ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`}</h1>
                                         <p className="text-sm">{`Àge: ${s.age} ans`}</p>
                                         <p className="text-sm">{`Région: ${regions.get(s.region)}`}</p>
                                         {/* Ajoute d'autres informations ici si nécessaire */}
-                                    </div>
-
-                                    <div className="w-1/3">
-                                        {
-                                            s.participants.indexOf(session?.user?.id) == -1 &&
-                                            
-                                            <button className="bg-blue-500 block py-2 px-4 text-white hover:bg-blue-700 rounded" onClick={() => handleMeeting(index)}>Réserver</button>
-                                        }
-
-                                        {
-                                            s.participants.indexOf(session?.user?.id) != -1 &&
-                                            
-                                            <button className="bg-gray-500 block py-2 px-4 text-white rounded cursor-auto">Soirée réservée</button>
-                                        }
                                     </div>
                                 </div>
                             })
