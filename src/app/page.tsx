@@ -197,7 +197,7 @@ export default function main()
   }
 
   return (
-    <div className="bg-blue-200 min-h-screen">
+    <div className="bg-pink-50 min-h-screen">
       {content}
     </div>
   );
