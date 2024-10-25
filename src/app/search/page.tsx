@@ -8,6 +8,7 @@ import Navbar from '../components/navbar'
 import { useEffect, useState } from 'react'
 import { getMeetingsFiltered } from '../actions/meetings/get'
 import { useRouter } from "next/navigation";
+import { imgPaths, regions } from '../api/variables/meetings'
 
 export default function ProfileList() {
     const [meetings, setMeetings] = useState<any>([]);
@@ -19,24 +20,11 @@ export default function ProfileList() {
         {
             const data = JSON.parse(res);
             let meetings2: any[] = [];
-
-            const regions = new Map<string, string>();
-
-            regions.set("SE", "Sud-est");
-            regions.set("NE", "Nord-est");
-            regions.set("NO", "Nord-ouest");
-            regions.set("SO", "Sud-ouest");
-
-            const paths = new Map<string, string[]>();
-
-            paths.set("man_woman", ["pexels-cottonbro-6789162.jpg", "pexels-jonathanborba-13780012.jpg", "pexels-leticiacurveloph-17463408.jpg"]);
-            paths.set("man_man", ["pexels-ketut-subiyanto-4746650.jpg", "pexels-ketut-subiyanto-4833656.jpg"]);
-            paths.set("woman_woman", ["pexels-felipebalduino-2546885.jpg", "pexels-felipebalduino-2546890.jpg"]);
             
             data.map((d: any) =>
             {
-                const indexImg = Math.floor(Math.random() * paths.get(d.orientation)?.length);
-                const path = `/img/meetings/${d.orientation}/${paths.get(d.orientation)[indexImg]}`;
+                const indexImg = Math.floor(Math.random() * imgPaths.get(d.orientation)?.length);
+                const path = `/img/meetings/${d.orientation}/${imgPaths.get(d.orientation)[indexImg]}`;
                 
                 meetings2.push({
                     id: d.id,

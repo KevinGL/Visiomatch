@@ -48,7 +48,7 @@ export const delCurrentuserToMeeting = async (id: string) =>
 
         let meeting = (await ref.get()).data();
 
-        const index: number = meeting?.participants.indexOf();
+        const index: number = meeting?.participants.indexOf(id);
 
         if(meeting && index == -1)
         {

@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Heart, MessageCircle, User, Search, Menu } from 'lucide-react'
+import { Heart, User, Search, Menu, DoorOpen } from 'lucide-react'
 import { useRouter } from "next/navigation";
 import { Button } from '@/components/ui/button'
 import { signOut } from 'next-auth/react';
@@ -13,7 +13,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: 'Matches', href: '/matches', icon: Heart },
-    { name: 'Se déconnecter', callback: () => signOut(), icon: MessageCircle },
+    { name: 'Se déconnecter', callback: () => signOut(), icon: DoorOpen },
     { name: 'Trouver une séance visio', callback: () => { router.push("/search") }, icon: Search },
   ]
 
@@ -22,9 +22,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0">
+            <button className="flex-shrink-0" onClick={() => router.push("/")}>
               <span className="text-2xl font-bold">❤️ Visiomatch</span>
-            </Link>
+            </button>
           </div>
           <div className="hidden md:block flex-1 max-w-xs mx-8">
             <div className="relative">

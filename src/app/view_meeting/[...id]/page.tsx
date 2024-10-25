@@ -1,221 +1,215 @@
 "use client"
 
-import { getMeetingById } from "@/app/actions/meetings/get";
-import { addCurrentuserToMeeting, delCurrentuserToMeeting } from "@/app/actions/meetings/post";
-import AuthGuard from "@/app/components/AuthGuard";
-import Navbar from "@/app/components/navbar";
-import { useSession } from "next-auth/react";
-import Image from 'next/image';
-import { useRouter } from "next/navigation";
-import { useDeferredValue, useEffect, useState } from "react";
+import * as React from 'react'
+import Image from 'next/image'
+import { CalendarDays, MapPin, Clock, Users, X } from 'lucide-react'
 
-const view_meeting = ({ params }: any) =>
+import { Button } from '@/components/ui/button'
+import Navbar from '@/app/components/navbar'
+import { useEffect, useState } from 'react'
+import { getMeetingById } from '@/app/actions/meetings/get'
+import { imgPaths, orientations, regions } from '@/app/api/variables/meetings'
+import { addCurrentuserToMeeting, delCurrentuserToMeeting } from '@/app/actions/meetings/post'
+import { useSession } from 'next-auth/react'
+
+export default function MeetingView({ params }: any)
 {
-    let [meeting, setMeeting] = useState({} as any);
-    let [displayModal1, setDisplayModal1] = useState(false);
-    let [displayModal2, setDisplayModal2] = useState(false);
-    let [msgModal1, setMsgModal1] = useState("");
-    let [msgModal2, setMsgModal2] = useState("");
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isModalOpen2, setIsModalOpen2] = useState(false);
+    const [meeting, setMeeting] = useState<any>({ participants: [] });
     const { data: session, status } = useSession();
-    const router = useRouter();
 
     useEffect(() =>
     {
-        getMeetingById(params.id[0]).then((res) =>
+        getMeetingById(params.id[0])
+        .then((res) =>
         {
-            let paths = new Map<string, Array<string>>();
-                            
-            paths.set("man_man",
-            [
-                "pexels-ketut-subiyanto-4746650.jpg",
-                "pexels-ketut-subiyanto-4833656.jpg"
-            ]);
-
-            paths.set("man_woman",
-            [
-                "pexels-cottonbro-6789162.jpg",
-                "pexels-jonathanborba-13780012.jpg",
-                "pexels-leticiacurveloph-17463408.jpg"
-            ]);
-
-            paths.set("woman_woman",
-            [
-                "pexels-felipebalduino-2546885.jpg",
-                "pexels-felipebalduino-2546890.jpg"
-            ]);
-
-            if(!res)
-            {
-                router.push("/");
-            }
+            const data = JSON.parse(res);
             
-            else
+            const indexImg = Math.floor(Math.random() * imgPaths.get(data.orientation)?.length);
+            const path = `/img/meetings/${data.orientation}/${imgPaths.get(data.orientation)[indexImg]}`;
+
+            const date = new Date(data.date._seconds * 1000);
+
+            const meeting2 =
             {
-                const data = JSON.parse(res);
+                age: data.age,
+                imageUrl: path,
+                date: date,
+                time: `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`,
+                name: orientations.get(data.orientation),
+                location: regions.get(data.region),
+                participants: data.participants
+            };
 
-                const list = paths.get(data.orientation);
-                let path = "";
-
-                if(list)
-                {
-                    const indexMeeting: number = Math.floor(Math.random() * (list.length - 1));
-                    path = `/img/meetings/${data.orientation}/${list[indexMeeting]}`;
-                }
-
-                const date: Date = new Date(data.date._seconds * 1000);
-
-                const days: string[] =
-                [
-                    "dimanche",
-                    "lundi",
-                    "mardi",
-                    "mercredi",
-                    "jeudi",
-                    "vendredi",
-                    "samedi"
-                ];
-
-                const months: string[] =
-                [
-                    "janvier",
-                    "février",
-                    "mars",
-                    "avril",
-                    "mai",
-                    "juin",
-                    "juillet",
-                    "août",
-                    "septembre",
-                    "octobre",
-                    "novembre",
-                    "décembre"
-                ];
-
-                const regions = new Map<string, string>();
-
-                regions.set("SE", "sud-est");
-                regions.set("SO", "sud-ouest");
-                regions.set("NO", "nord-ouest");
-                regions.set("NE", "nord-est");
-
-                const orientations = new Map<string, string>();
-
-                orientations.set("man_woman", "Homme femme");
-                orientations.set("man_man", "Homme homme");
-                orientations.set("woman_woman", "Femme femme");
-                
-                setMeeting({
-                    age: `${data.age} ans`,
-                    date: `le ${days[date.getDay()]} ${date.getDate().toString().padStart(2, "0")} ${months[date.getMonth()]} à ${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`,
-                    img: path,
-                    region: regions.get(data.region),
-                    orientation: orientations.get(data.orientation),
-                    participants: data.participants
-                });
-            }
+            setMeeting(meeting2);
         });
     }, []);
-    
-    return (
-        <AuthGuard>
-            <div className="bg-blue-200 min-h-screen">
-                <Navbar />
-                <div className="container mx-auto p-4">
-                    <div className="grid grid-cols-1 gap-6">
-                        <Image
-                            src={meeting.img}
-                            alt="Logo"
-                            width={400}
-                            height={400}
-                            layout="intrinsic"
-                            className="rounded-lg mx-auto"
-                        />
-                        <div className="mx-auto">
-                            <h1 className="sm:text-lg md:text-xl lg:text-2xl xl:text-3xl font-bold text-center">Séance visio {meeting.date}</h1>
-                            <h2 className="sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-center">Région {meeting.region}</h2>
-                            <h2 className="sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold text-center">{meeting.orientation}</h2>
-                            <h2 className="sm:text-sm md:text-base lg:text-lg xl:text-xl font-bold text-center">{meeting.age}</h2>
-                        </div>
-                        {
-                            meeting.participants && meeting.participants.indexOf(session?.user?.id) == -1 &&
-                            
-                            <button onClick={() =>{
-                                addCurrentuserToMeeting(params.id[0])
-                                    .then(() =>
-                                    {
-                                        setDisplayModal1(true);
-                                        setMsgModal1("Réservation effectuée avec succès !");
-                                        setMsgModal2(`RDV ${meeting.date} pour un échange convivial !`);
 
-                                        let meeting2 = meeting;
-                                        meeting2.participants.push(session?.user?.id);
-                                        setMeeting(meeting2);
-                                    })
-                                    .catch(() =>
-                                    {
-                                        setDisplayModal1(true);
-                                        setMsgModal1("Une erreur s'est produite ...");
-                                    });
-                                }}
-                                className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mx-auto">Réserver ma séance
-                            </button>
-                        }
-                        {
-                            meeting.participants && meeting.participants.indexOf(session?.user?.id) != -1 &&
-
-                            <button
-                                onClick={() => setDisplayModal2(true)}
-                                className="w-full max-w-md px-4 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mx-auto text-center">Annuler ma réservation
-                            </button>
-                        }
-                    </div>
+  return (
+    <div className="min-h-screen bg-pink-50">
+        <Navbar />
+        <div className="container mx-auto p-4">
+        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div className="relative h-64 sm:h-80 md:h-96">
+            <Image
+                src={meeting.imageUrl}
+                alt={meeting.name}
+                layout="fill"
+                objectFit="cover"
+            />
+            </div>
+            <div className="p-6">
+            <h1 className="text-3xl font-bold text-pink-600 mb-4">{meeting.name}</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-center text-gray-600">
+                <CalendarDays className="mr-2 h-5 w-5" />
+                {new Date(meeting.date).toLocaleDateString('fr-FR', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                })}
+                </div>
+                <div className="flex items-center text-gray-600">
+                <Clock className="mr-2 h-5 w-5" />
+                {meeting.time}
+                </div>
+                <div className="flex items-center text-gray-600">
+                <MapPin className="mr-2 h-5 w-5" />
+                {meeting.location}
+                </div>
+                <div className="flex items-center text-gray-600">
+                <Users className="mr-2 h-5 w-5" />
+                {meeting.participants.length} participants
                 </div>
             </div>
-            {
-                displayModal1 &&
-                
-                <div className="absolute sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 w-full max-w-full left-1/2 top-1/4 transform -translate-x-1/2 -translate-y-1/2 h-64 bg-sky-100 rounded-lg">
-                    <h1 className="sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-center pt-4">{msgModal1}</h1>
-                    <h1 className="sm:text-lg md:text-xl lg:text-1xl xl:text-2xl font-bold text-center pt-4 px-4">{msgModal2}</h1>
-                    <button className="w-auto max-w-md px-4 py-2 mt-10 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 mx-auto block" onClick={() => setDisplayModal1(false)}>OK</button>
+            <Button 
+                onClick={() =>
+                    {
+                        if(meeting.participants.indexOf(session?.user.id) == -1)
+                        {
+                            setIsModalOpen(true);
+                        }
+
+                        else
+                        {
+                            setIsModalOpen2(true);
+                        }
+                    }
+                }
+                className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded"
+            >
+                {
+                    meeting.participants.indexOf(session?.user.id) == -1 &&
+
+                    <>Réserver</>
+                }
+
+                {
+                    meeting.participants.indexOf(session?.user.id) != -1 &&
+
+                    <>Annuler</>
+                }
+            </Button>
+            </div>
+        </div>
+
+        {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-pink-600">Confirmer réservation</h2>
+                <button onClick={() => setIsModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                    <X className="h-6 w-6" />
+                </button>
                 </div>
-            }
-            {
-                displayModal2 &&
-                
-                <div className="absolute sm:w-3/4 md:w-3/4 lg:w-1/2 xl:w-1/2 w-full max-w-full left-1/2 top-1/4 transform -translate-x-1/2 -translate-y-1/2 h-36 bg-sky-100 rounded-lg">
-                    <h1 className="sm:text-base md:text-lg lg:text-xl xl:text-2xl font-bold text-center pt-4">Annuler la réservation ?</h1>
-                    <div className="flex justify-center space-x-4 mt-10">
-                        <button
-                            className="w-1/4 max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                            onClick={() =>
+                <p className="mb-4">Réservation pour : <strong>{meeting.name}</strong></p>
+                <p className="mb-2"><strong>Date:</strong> {new Date(meeting.date).toLocaleDateString()}</p>
+                <p className="mb-2"><strong>Time:</strong> {meeting.time}</p>
+                <p className="mb-4"><strong>Région:</strong> {meeting.location}</p>
+                <div className="flex justify-end">
+                <Button 
+                    onClick={() => setIsModalOpen(false)}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+                >
+                    Annuler
+                </Button>
+                <Button 
+                    onClick={() => {
+                        // Here you would typically handle the booking logic
+                        addCurrentuserToMeeting(params.id[0])
+                        .then(() =>
+                        {
+                            const meeting2 = meeting;
+                            
+                            if(meeting2.participants.indexOf(session?.user.id) == -1)
                             {
-                                setDisplayModal2(false);
+                                meeting2.participants.push(session?.user.id);
+                            }
 
-                                let meeting2 = meeting;
-                                const index: number = meeting2.participants.indexOf(session?.user?.id);
-
-                                if (index > -1)
-                                {
-                                    meeting.participants.splice(index, 1);
-                                }
-
-                                delCurrentuserToMeeting(params.id[0]);
-                            }}
-                            >
-                            Oui
-                        </button>
-                        <button
-                            className="w-1/4 max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                            onClick={() => setDisplayModal2(false)}
-                            >
-                            Non
-                        </button>
-                    </div>
+                            setMeeting(meeting2);
+                            //alert('Booking confirmed!');
+                            setIsModalOpen(false);
+                        });
+                    }}
+                    className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Confirmer réservation
+                </Button>
                 </div>
-            }
-        </AuthGuard>
-    )
-}
+            </div>
+            </div>
+        )}
 
-export default view_meeting;
+        {isModalOpen2 && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 max-w-md w-full">
+                <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-pink-600">Annuler réservation</h2>
+                <button onClick={() => setIsModalOpen2(false)} className="text-gray-500 hover:text-gray-700">
+                    <X className="h-6 w-6" />
+                </button>
+                </div>
+                <p className="mb-4">Annuler la réservation pour : <strong>{meeting.name}</strong></p>
+                <p className="mb-2"><strong>Date:</strong> {new Date(meeting.date).toLocaleDateString()}</p>
+                <p className="mb-2"><strong>Time:</strong> {meeting.time}</p>
+                <p className="mb-4"><strong>Région:</strong> {meeting.location}</p>
+                <div className="flex justify-end">
+                <Button 
+                    onClick={() => setIsModalOpen2(false)}
+                    className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded mr-2"
+                >
+                    Annuler
+                </Button>
+                <Button 
+                    onClick={() => {
+                        // Here you would typically handle the booking logic
+                        delCurrentuserToMeeting(params.id[0])
+                        .then(() =>
+                        {
+                            const meeting2 = meeting;
+                            
+                            const index: number = meeting2?.participants.indexOf(params.id[0]);
+
+                            if(index == -1)
+                            {
+                                meeting2.participants.splice(index, 1);
+                                setMeeting(meeting2);
+                            }
+
+                            //alert('Booking confirmed!');
+                            setIsModalOpen2(false);
+                        });
+                    }}
+                    className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded"
+                >
+                    Annuler réservation
+                </Button>
+                </div>
+            </div>
+            </div>
+        )}
+        </div>
+    </div>
+  )
+}
