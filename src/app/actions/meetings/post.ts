@@ -3,6 +3,7 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
+import { metadata } from "@/app/layout";
 
 export const addCurrentuserToMeeting = async (id: string) =>
 {
@@ -16,15 +17,41 @@ export const addCurrentuserToMeeting = async (id: string) =>
         }
         
         const ref = db.collection("meetings").doc(id);
+        const meeting = (await ref.get()).data();
+        
+        const meetingsRef = db.collection("meetings");
+        const querySnapshot = await meetingsRef.get();
 
-        let meeting = (await ref.get()).data();
-
-        if(meeting && meeting.participants.indexOf(session.user.id) == -1)
+        let sameTime = false;
+        
+        querySnapshot.forEach((doc) =>
         {
-            meeting.participants.push(session.user.id);
-            await ref.update({ participants: meeting.participants });
+            if(doc.id != id && doc.data().participants.indexOf(session.user.id) != -1 && meeting?.date._seconds == doc.data().date._seconds)
+            {
+                sameTime = true;
+            }
+        });
 
-            return { success: true, message: "User added to meeting successfully." };
+        if(meeting)
+        {
+            if(meeting.participants.indexOf(session.user.id) != -1)
+            {
+                return { success: false, message: "Vous êtes déjà inscrit à cette séance" };
+            }
+
+            else
+            if(sameTime)
+            {
+                return { success: false, message: "Vous ne pouvez pas vous inscrire à deux séances se déroulant au même moment" };
+            }
+
+            else
+            {
+                meeting.participants.push(session.user.id);
+                await ref.update({ participants: meeting.participants });
+    
+                return { success: true, message: "Confirmation de votre inscription" };
+            }
         }
     }
     catch (error: any)
@@ -56,7 +83,7 @@ export const delCurrentuserToMeeting = async (id: string) =>
             
             await ref.update({ participants: meeting.participants });
 
-            return { success: true, message: "User added to meeting successfully." };
+            return { success: true, message: "Confirmation de l'annulation" };
         }
     }
     catch (error: any)
