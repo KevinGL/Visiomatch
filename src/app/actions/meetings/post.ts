@@ -42,7 +42,7 @@ export const addCurrentuserToMeeting = async (id: string) =>
             else
             if(sameTime)
             {
-                return { success: false, message: "Vous ne pouvez pas vous inscrire à deux séances se déroulant au même moment" };
+                return { success: false, message: "Vous ne pouvez pas vous inscrire à deux séances simultanées" };
             }
 
             else
