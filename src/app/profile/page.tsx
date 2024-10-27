@@ -10,9 +10,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import AuthGuard from '../components/AuthGuard'
 import Navbar from '../components/navbar'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { getProfile } from '../actions/profile/get'
 import { updateProfile } from '../actions/profile/post'
+import MeetingsList from '../components/meetings-list'
+import { getUserNextMeetings } from '../actions/meetings/get'
 
 export default function ProfileDisplayEdit() {
   const [isEditing, setIsEditing] = React.useState(false)
@@ -306,6 +308,7 @@ export default function ProfileDisplayEdit() {
                     </div>
                 </div>
             </div>
+            <MeetingsList />
         </div>
     </AuthGuard>
   )

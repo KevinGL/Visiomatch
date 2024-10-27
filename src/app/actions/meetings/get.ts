@@ -76,3 +76,29 @@ export const getMeetingById = async (id: string) =>
 
     return JSON.stringify((await meetingsSnapshot.get()).data());
 }
+
+export const getUserNextMeetings = async () =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    const meetingsSnapshot = db.collection("meetings").where("participants", "array-contains", session.user.id);
+
+    let meetings: any[] = [];
+
+    (await meetingsSnapshot.get()).docs.map((m: any) =>
+    {
+        //console.log(m.data());
+
+        if(m.data().date._seconds * 1000 >= Date.now())
+        {
+            meetings.push({...m.data(), id: m.id});
+        }
+    });
+
+    return JSON.stringify(meetings);
+}
