@@ -16,3 +16,5 @@ export const orientations = new Map<string, string>();
 orientations.set("man_woman", "Séance visio homme femme");
 orientations.set("man_man", "Séance visio homme homme");
 orientations.set("woman_woman", "Séance visio femme femme");
+
+export const meetingDuration = 3600000;

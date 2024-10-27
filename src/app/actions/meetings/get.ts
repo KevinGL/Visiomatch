@@ -3,6 +3,7 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
+import { meetingDuration } from "@/app/api/variables/meetings";
 
 export const getMeetingsFiltered = async () =>
 {
@@ -92,9 +93,9 @@ export const getUserNextMeetings = async () =>
 
     (await meetingsSnapshot.get()).docs.map((m: any) =>
     {
-        //console.log(m.data());
+        console.log(Date.now(), m.data().date._seconds * 1000 + meetingDuration);
 
-        if(m.data().date._seconds * 1000 >= Date.now())
+        if(Date.now() <= m.data().date._seconds * 1000 + meetingDuration)
         {
             meetings.push({...m.data(), id: m.id});
         }

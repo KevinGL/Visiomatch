@@ -2,12 +2,14 @@
 
 import * as React from 'react'
 import Image from 'next/image'
-import { CalendarDays, MapPin, Users } from 'lucide-react'
+import { CalendarDays, MapPin, Users, Video } from 'lucide-react'
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 import { getUserNextMeetings } from '../actions/meetings/get'
-import { imgPaths, regions } from '../api/variables/meetings'
+import { imgPaths, meetingDuration, regions } from '../api/variables/meetings'
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/navigation'
 
 // Sample data for meetings
 const meetings = [
@@ -49,6 +51,7 @@ const meetings = [
 export default function MeetingsList() {
 
   const [meetings, setMeetings] = useState<any[]>([]);
+  const router = useRouter();
 
     useEffect(() =>
     {
@@ -69,7 +72,7 @@ export default function MeetingsList() {
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
-                })}` , region: regions.get(d.region)});
+                })}` , region: regions.get(d.region), date });
             });
           
             setMeetings(meetings2);
@@ -112,6 +115,19 @@ export default function MeetingsList() {
                 </div>
               </div>
             </CardContent>
+            {
+              Date.now() >= meeting.date?.getTime() && Date.now() <= meeting.date?.getTime() + meetingDuration &&
+
+              <CardFooter>
+                <Button 
+                  className="w-full bg-pink-600 hover:bg-pink-700 text-white"
+                  onClick={() => router.push(`/do_meeting/${meeting.id}`)}
+                >
+                  <Video className="mr-2 h-4 w-4" />
+                  Accéder à la séance !
+                </Button>
+              </CardFooter>
+            }
           </Card>
         ))}
       </div>
