@@ -55,6 +55,7 @@ export default function Navbar() {
               variant="ghost"
               className="relative"
               size="icon"
+              onClick={() => router.push("/profile")}
             >
               <div className="w-8 h-8 rounded-full bg-white text-pink-500 flex items-center justify-center">
                 <User size={18} />

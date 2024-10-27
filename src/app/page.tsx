@@ -10,6 +10,11 @@ import { Home } from './components/Home';
 export default function main()
 {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [city, setCity] = useState("");
+  const [zipcode, setZipcode] = useState("");
+  const [country, setCountry] = useState("");
+  const [phoneNumber, setPhonenumber] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState("");
   const [search, setSearch] = useState("");
@@ -146,25 +151,129 @@ export default function main()
       if(step == 4)
       {
         content = (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <input
-            type="password"
-            placeholder="Mot de passe ?"
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button onClick={() => signIn("credentials",
-            {
-              redirect: false,
-              email,
-              password,
-              gender,
-              search,
-              birthdate
-            })}
-            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">S'inscrire
-          </button>
-        </div>)
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <input
+              type="text"
+              placeholder="Choisissez un pseudo"
+              name="username"
+              onChange={(e) => setName(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button onClick={() =>
+                {
+                  if(name != "")
+                  {
+                    setStep(5);
+                  }
+                }
+              }
+              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
+            </button>
+          </div>)
+      }
+
+      else
+      if(step == 5)
+      {
+        content = (
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <input
+              type="text"
+              placeholder="Ville"
+              name="city"
+              onChange={(e) => setCity(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+
+            <input
+              type="number"
+              placeholder="Code postal"
+              name="zipcode"
+              onChange={(e) => setZipcode(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+
+            <input
+              type="text"
+              placeholder="Pays"
+              name="country"
+              onChange={(e) => setCountry(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button onClick={() =>
+                {
+                  if(city != "" && zipcode != "" && country != "")
+                  {
+                    setStep(6);
+                  }
+                }
+              }
+              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
+            </button>
+          </div>)
+      }
+
+      else
+      if(step == 6)
+      {
+        content = (
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <input
+              type="tel"
+              placeholder="Numéro de téléphone"
+              name="text"
+              onChange={(e) => setPhonenumber(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button onClick={() =>
+                {
+                  if(name != "")
+                  {
+                    setStep(7);
+                  }
+                }
+              }
+              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
+            </button>
+          </div>)
+      }
+
+      else
+      if(step == 7)
+      {
+        content = (
+          <div className="flex flex-col items-center justify-center min-h-screen p-4">
+            <input
+              type="password"
+              placeholder="Mot de passe ?"
+              name="password"
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <button onClick={() =>
+              {
+                if(password != "")
+                {
+                  signIn("credentials",
+                    {
+                      redirect: false,
+                      name,
+                      email,
+                      password,
+                      gender,
+                      search,
+                      city,
+                      zipcode,
+                      country,
+                      phoneNumber,
+                      birthdate
+                    })
+                }
+              }
+            }
+              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">S'inscrire
+            </button>
+          </div>)
       }
     }
 

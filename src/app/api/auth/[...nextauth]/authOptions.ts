@@ -9,11 +9,16 @@ export const authOptions =
       CredentialsProvider({
         name: 'Credentials',
         credentials: {
+          name: { label: "Name", type: "text" },
           email: { label: "Email", type: "text" },
           password: { label: "Password", type: "password" },
           gender: { label: "Gender", type: "text" },
           search: { label: "Search", type: "text" },
-          birthdate: { label: "Birthdate", type: "date" },
+          city: { label: "City", type: "text" },
+          zipcode: { label: "Zip Code", type: "text" },
+          country: { label: "Country", type: "text" },
+          phoneNumber: { label: "Num tel", type: "text" },
+          birthdate: { label: "Birthdate", type: "text" },
         },
         async authorize(credentials) {
           // Valider les informations de connexion ici
@@ -41,11 +46,16 @@ export const authOptions =
               const hashedPassword = await bcrypt.hash(credentials?.password as string, 10);
               
               const newUser = await db.collection("users").add({
+                  name: credentials?.name,
                   email: credentials?.email,
                   password: hashedPassword,
                   createdAt: admin.firestore.FieldValue.serverTimestamp(),
                   gender: credentials?.gender,
                   search: credentials?.search,
+                  city: credentials?.city,
+                  zipcode: credentials?.zipcode,
+                  country: credentials?.country,
+                  phoneNumber: credentials?.phoneNumber,
                   birthdate: credentials?.birthdate
                 });
   
