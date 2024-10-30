@@ -88,6 +88,16 @@ export default function Navbar() {
                 {item.name}
               </button>
             ))}
+
+              <button
+                key="profile"
+                className="flex items-center px-3 py-2 rounded-md text-base font-medium hover:bg-pink-600 transition-colors duration-200"
+                onClick={() => router.push("/profile")}
+              >
+                <User className="mr-2" size={18} />
+                Profil
+              </button>
+            
             <div className="mt-4 relative">
               <input
                 type="text"
