@@ -1,11 +1,9 @@
-// next.config.js
-module.exports = {
+// next.config.mjs
+export default {
     eslint: {
-      // Ignorer les erreurs ESLint lors du build sur Vercel
       ignoreDuringBuilds: true,
     },
     typescript: {
-      // Ignorer les erreurs TypeScript lors du build sur Vercel
       ignoreBuildErrors: true,
     },
   };
