@@ -3,7 +3,7 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
-import { metadata } from "@/app/layout";
+//import { metadata } from "@/app/layout";
 
 export const updateProfile = async (req: any) =>
 {

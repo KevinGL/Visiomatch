@@ -2,6 +2,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { db } from "@/firebase/config";
 import * as admin from 'firebase-admin';
 import bcrypt from 'bcrypt';
+import { JWT } from 'next-auth/jwt';
 
 export const authOptions =
 {
@@ -78,7 +79,7 @@ export const authOptions =
     ],
   
     callbacks: {
-      async jwt({ token, user })
+      async jwt({ token, user }: { token: JWT, user?: any })
       {
         // Si l'utilisateur est authentifié, ajouter l'id dans le token JWT
         if (user)
@@ -88,7 +89,7 @@ export const authOptions =
         return token;
       },
   
-      async session({ session, token })
+      async session({ session, token }: { session: any, token: JWT })
       {
         // Ajouter l'id de l'utilisateur à la session depuis le token JWT
         if (token?.id)

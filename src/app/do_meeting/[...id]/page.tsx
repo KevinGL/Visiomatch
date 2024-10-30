@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import Navbar from '@/app/components/navbar'
 import AllowDoMeeting from '@/app/components/AllowDoMeeting'
+import { useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 
 // This is a mock function to simulate sending a message
 const sendMessage = (message: string) => {
@@ -25,6 +27,8 @@ export default function VideoConference({ params }: any) {
     { sender: 'You', text: 'Hey Sarah! Me too, it\'s great to finally "meet" you!' },
   ])
 
+  const { data: session, status } = useSession();
+
   const handleSendMessage = () => {
     if (message.trim()) {
       setMessages([...messages, { sender: 'You', text: message }])
@@ -32,6 +36,18 @@ export default function VideoConference({ params }: any) {
       setMessage('')
     }
   }
+
+    useEffect(() =>
+    {
+        /*const socket = new WebSocket('ws://localhost:8080');
+
+        socket.onopen = () =>
+        {
+            console.log('Connecté au serveur WebSocket');
+
+            socket.send(JSON.stringify({ type: "connect", user_id: session?.user.id, meeting_id: params.id[0] }));
+        };*/
+    }, []);
 
   return (
     <AllowDoMeeting id={params.id[0]}>

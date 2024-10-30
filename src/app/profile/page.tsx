@@ -239,7 +239,7 @@ export default function ProfileDisplayEdit() {
                                         onValueChange={handleSelectChange('gender')}
                                         defaultValue={userData.gender}
                                         className="flex space-x-4 mt-1"
-                                        onChange={(e) => setUserData({ ...userData, gender: e.target.value })}
+                                        onChange={(e) => setUserData({ ...userData, gender: (e.target as any).value as any })}
                                         >
                                         <div className="flex items-center space-x-2">
                                             <RadioGroupItem value="man" id="male" />
@@ -259,7 +259,7 @@ export default function ProfileDisplayEdit() {
                                         onValueChange={handleSelectChange('seeking')}
                                         defaultValue={userData.search}
                                         className="flex space-x-4 mt-1"
-                                        onChange={(e) => setUserData({ ...userData, search: e.target.value })}
+                                        onChange={(e) => setUserData({ ...userData, search: (e.target as any).value })}
                                         >
                                         <div className="flex items-center space-x-2">
                                             <RadioGroupItem value="man" id="seeking-male" />

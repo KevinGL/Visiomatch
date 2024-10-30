@@ -28,24 +28,29 @@ export default function MeetingView({ params }: any)
         .then((res) =>
         {
             const data = JSON.parse(res);
+
+            const images = imgPaths.get(data.orientation);
             
-            const indexImg = Math.floor(Math.random() * imgPaths.get(data.orientation)?.length);
-            const path = `/img/meetings/${data.orientation}/${imgPaths.get(data.orientation)[indexImg]}`;
-
-            const date = new Date(data.date._seconds * 1000);
-
-            const meeting2 =
+            if(images)
             {
-                age: data.age,
-                imageUrl: path,
-                date: date,
-                time: `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`,
-                name: orientations.get(data.orientation),
-                location: regions.get(data.region),
-                participants: data.participants
-            };
+                const indexImg = Math.floor(Math.random() * images.length);
+                const path = `/img/meetings/${data.orientation}/${images[indexImg]}`;
 
-            setMeeting(meeting2);
+                const date = new Date(data.date._seconds * 1000);
+
+                const meeting2 =
+                {
+                    age: data.age,
+                    imageUrl: path,
+                    date: date,
+                    time: `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`,
+                    name: orientations.get(data.orientation),
+                    location: regions.get(data.region),
+                    participants: data.participants
+                };
+
+                setMeeting(meeting2);
+            }
         });
     }, []);
 

@@ -17,15 +17,18 @@ export default function AllowDoMeeting({ children, id }: any)
             router.push("/");
         }
         
-        getMeetingById(id).then((res: string) =>
+        if(status === "authenticated" && session?.user)
         {
-            const meeting = JSON.parse(res);
-            
-            if (meeting.participants.indexOf(session?.user.id) == -1 || Date.now() < meeting.date._seconds * 1000 || Date.now() > meeting.date._seconds * 1000 + meetingDuration)
+            getMeetingById(id).then((res: string) =>
             {
-                router.push("/");
-            }
-        });
+                const meeting = JSON.parse(res);
+                
+                if (meeting.participants.indexOf(session.user?.id) == -1 || Date.now() < meeting.date._seconds * 1000 || Date.now() > meeting.date._seconds * 1000 + meetingDuration)
+                {
+                    router.push("/");
+                }
+            });
+        }
     }, [status, router]);
 
     if (status === "loading")

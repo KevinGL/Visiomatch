@@ -4,6 +4,7 @@ import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
 import { meetingDuration } from "@/app/api/variables/meetings";
+import { Meeting } from "@/app/types";
 
 export const getMeetingsFiltered = async () =>
 {
@@ -26,7 +27,7 @@ export const getMeetingsFiltered = async () =>
     
     const meetingsSnapshot = await db.collection("meetings").get();
 
-    const meetings: any[] = meetingsSnapshot.docs.map(doc => ({
+    const meetings: Meeting[] = meetingsSnapshot.docs.map(doc => ({
         id: doc.id,
         age: doc.data().age,
         orientation: doc.data().orientation,
@@ -37,7 +38,7 @@ export const getMeetingsFiltered = async () =>
 
     //console.log(currentUser.data());
 
-    const meetingsFiltered = meetings.filter((m: any) =>
+    const meetingsFiltered = meetings.filter((m: Meeting) =>
     {
         let orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
 
@@ -89,7 +90,7 @@ export const getUserNextMeetings = async () =>
 
     const meetingsSnapshot = db.collection("meetings").where("participants", "array-contains", session.user.id);
 
-    let meetings: any[] = [];
+    const meetings: Meeting[] = [];
 
     (await meetingsSnapshot.get()).docs.map((m: any) =>
     {

@@ -23,16 +23,21 @@ export default function ProfileList() {
             
             data.map((d: any) =>
             {
-                const indexImg = Math.floor(Math.random() * imgPaths.get(d.orientation)?.length);
-                const path = `/img/meetings/${d.orientation}/${imgPaths.get(d.orientation)[indexImg]}`;
-                
-                meetings2.push({
-                    id: d.id,
-                    date: d.date,
-                    ageRange: d.age,
-                    region: regions.get(d.region),
-                    imageUrl: path
-                });
+                const images = imgPaths.get(d.orientation);
+
+                if (images && images.length > 0)
+                {
+                    const indexImg = Math.floor(Math.random() * images.length);
+                    const path = `/img/meetings/${d.orientation}/${images[indexImg]}`;
+                    
+                    meetings2.push({
+                        id: d.id,
+                        date: d.date,
+                        ageRange: d.age,
+                        region: regions.get(d.region),
+                        imageUrl: path
+                    });
+                }
             });
 
             setMeetings(meetings2);

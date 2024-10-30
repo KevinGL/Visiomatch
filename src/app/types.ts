@@ -1,3 +1,5 @@
+import NextAuth from "next-auth";
+
 export interface User
 {
     id: string,
@@ -17,3 +19,13 @@ export interface Meeting
     age: string,
     participants: User[]
 }
+
+declare module "next-auth" {
+    interface User {
+      id: string; // Ajoutez d'autres propriétés si nécessaire
+    }
+  
+    interface Session {
+      user: User;
+    }
+  }
