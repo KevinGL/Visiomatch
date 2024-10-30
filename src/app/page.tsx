@@ -6,6 +6,19 @@ import { checkExists } from './actions/checkExists';
 import { useEffect, useState } from 'react';
 import { setServers } from 'dns';
 import { Home } from './components/Home';
+import { CalendarDays, Mail, MapPin, Phone, User, Lock, Globe, Hash } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+
+const CenteredField: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+  <div className="min-h-screen flex items-center justify-center bg-pink-50">
+    <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
+      {children}
+    </div>
+  </div>
+)
 
 export default function main()
 {
@@ -58,22 +71,25 @@ export default function main()
     if (step === 0)
     {
       content = (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <input
-            type="email"
-            placeholder="Entrez votre adresse email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button onClick={() =>
-            {
-              checkExists(email).then((res) => setAccountExists(res));
-              setStep(1);
-            }
-          }
-          className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant</button>
-        </div>
+        <CenteredField>
+          <div className="space-y-4">
+            <Label htmlFor="email">Email</Label>
+            <div className="flex items-center">
+              <Mail className="w-5 h-5 text-gray-400 mr-2" />
+              <Input
+                id="email"
+                type="email"
+                onChange={(e) => setEmail(e.target.value)}
+                className="flex-grow"
+              />
+            </div>
+            <Button onClick={() =>
+                {
+                  checkExists(email).then((res) => setAccountExists(res));
+                  setStep(1);
+                }} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+          </div>
+        </CenteredField>
       );
     }
 
@@ -83,21 +99,21 @@ export default function main()
       if(step == 1)
       {
         content = (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <input
-              type="date"
-              placeholder="Entrez date de naissance"
-              onChange={(e) => setBirthdate(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button onClick={() =>
-              {
-                checkBirthdate();
-              }
-            }
-            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant</button>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-          </div>
+          <CenteredField>
+            <div className="space-y-4">
+              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <div className="flex items-center">
+                <CalendarDays className="w-5 h-5 text-gray-400 mr-2" />
+                <Input
+                  id="dateOfBirth"
+                  type="date"
+                  onChange={(e) => setBirthdate(e.target.value)}
+                  className="flex-grow"
+                />
+              </div>
+              <Button onClick={checkBirthdate} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+            </div>
+          </CenteredField>
         );
       }
 
@@ -105,203 +121,248 @@ export default function main()
       if(step == 2)
       {
         content = (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <select onChange={(e) => setGender(e.target.value)} value={gender} className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value="">Je suis</option>
-            <option value="man">Un homme</option>
-            <option value="woman">Une femme</option>
-          </select>
-          <button onClick={() =>
+          <CenteredField>
+            <div className="space-y-4">
+              <Label htmlFor="gender">Je suis</Label>
+              <div className="flex items-center">
+                <User className="w-5 h-5 text-gray-400 mr-2" />
+                <Select onValueChange={(e) => setGender(e)}>
+                  <SelectTrigger className="flex-grow">
+                    <SelectValue placeholder="Choisir" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="man">Homme</SelectItem>
+                    <SelectItem value="woman">Femme</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={() =>
               {
                 if(gender != "")
                 {
                   setStep(3);
                 }
               }
-            }
-            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
-          </button>
-        </div>)
+              } className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+            </div>
+          </CenteredField>
+        )
       }
 
       else
       if(step == 3)
       {
         content = (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <select onChange={(e) => setSearch(e.target.value)} value={search} className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-            <option value="">Je cherche</option>
-            <option value="man">Un homme</option>
-            <option value="woman">Une femme</option>
-          </select>
-          <button onClick={() =>
+          <CenteredField>
+            <div className="space-y-4">
+              <Label htmlFor="gender">Je cherche</Label>
+              <div className="flex items-center">
+                <User className="w-5 h-5 text-gray-400 mr-2" />
+                <Select onValueChange={(e) => setSearch(e)}>
+                  <SelectTrigger className="flex-grow">
+                    <SelectValue placeholder="Choisir" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="man">Homme</SelectItem>
+                    <SelectItem value="woman">Femme</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button onClick={() =>
               {
                 if(search != "")
                 {
                   setStep(4);
                 }
               }
-            }
-            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
-          </button>
-        </div>)
+              } className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+            </div>
+          </CenteredField>
+        )
       }
 
       else
       if(step == 4)
       {
         content = (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <input
-              type="text"
-              placeholder="Choisissez un pseudo"
-              name="username"
-              onChange={(e) => setName(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button onClick={() =>
-                {
-                  if(name != "")
+          <CenteredField>
+            <div className="space-y-4">
+              <Label htmlFor="username">Choisir un pseudo</Label>
+              <div className="flex items-center">
+                <User className="w-5 h-5 text-gray-400 mr-2" />
+                <Input
+                  id="username"
+                  onChange={(e) => setName(e.target.value)}
+                  className="flex-grow"
+                />
+              </div>
+              <Button onClick={() =>
                   {
-                    setStep(5);
+                    if(name != "")
+                    {
+                      setStep(5);
+                    }
                   }
-                }
-              }
-              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
-            </button>
-          </div>)
+              } className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+            </div>
+          </CenteredField>
+        )
       }
 
       else
       if(step == 5)
       {
         content = (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <input
-              type="text"
-              placeholder="Ville"
-              name="city"
-              onChange={(e) => setCity(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-
-            <input
-              type="number"
-              placeholder="Code postal"
-              name="zipcode"
-              onChange={(e) => setZipcode(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-
-            <input
-              type="text"
-              placeholder="Pays"
-              name="country"
-              onChange={(e) => setCountry(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button onClick={() =>
+          <CenteredField>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="city">Ville</Label>
+                <div className="flex items-center mt-1">
+                  <MapPin className="w-5 h-5 text-gray-400 mr-2" />
+                  <Input
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="flex-grow"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="postalCode">Code postal</Label>
+                <div className="flex items-center mt-1">
+                  <Hash className="w-5 h-5 text-gray-400 mr-2" />
+                  <Input
+                    id="postalCode"
+                    onChange={(e) => setZipcode(e.target.value)}
+                    className="flex-grow"
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="country">Pays</Label>
+                <div className="flex items-center mt-1">
+                  <MapPin className="w-5 h-5 text-gray-400 mr-2" />
+                  <Input
+                    id="country"
+                    onChange={(e) => setCountry(e.target.value)}
+                    className="flex-grow"
+                  />
+                </div>
+              </div>
+              <Button onClick={() =>
                 {
                   if(city != "" && zipcode != "" && country != "")
                   {
                     setStep(6);
                   }
-                }
-              }
-              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
-            </button>
-          </div>)
+                }} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+            </div>
+          </CenteredField>
+        )
       }
 
       else
       if(step == 6)
       {
         content = (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <input
-              type="tel"
-              placeholder="Numéro de téléphone"
-              name="text"
-              onChange={(e) => setPhonenumber(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button onClick={() =>
+          <CenteredField>
+            <div className="space-y-4">
+              <Label htmlFor="phoneNumber">Numéro de téléphone</Label>
+              <div className="flex items-center">
+                <Phone className="w-5 h-5 text-gray-400 mr-2" />
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  onChange={(e) => setPhonenumber(e.target.value)}
+                  className="flex-grow"
+                />
+              </div>
+              <Button onClick={() =>
                 {
                   if(name != "")
                   {
                     setStep(7);
                   }
-                }
-              }
-              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Suivant
-            </button>
-          </div>)
+                }} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
+            </div>
+          </CenteredField>
+        )
       }
 
       else
       if(step == 7)
       {
         content = (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <input
-              type="password"
-              placeholder="Mot de passe ?"
-              name="password"
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button onClick={() =>
-              {
-                if(password != "")
-                {
-                  signIn("credentials",
+          <CenteredField>
+            <div className="space-y-4">
+              <Label htmlFor="password">Choisir un mot de passe</Label>
+              <div className="flex items-center">
+                <Lock className="w-5 h-5 text-gray-400 mr-2" />
+                <Input
+                  id="password"
+                  type="password"
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="flex-grow"
+                />
+              </div>
+              <Button onClick={
+                () =>
+                  {
+                    if(password != "")
                     {
-                      redirect: false,
-                      name,
-                      email,
-                      password,
-                      gender,
-                      search,
-                      city,
-                      zipcode,
-                      country,
-                      phoneNumber,
-                      birthdate
-                    })
-                }
-              }
-            }
-              className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">S'inscrire
-            </button>
-          </div>)
+                      signIn("credentials",
+                        {
+                          redirect: false,
+                          name,
+                          email,
+                          password,
+                          gender,
+                          search,
+                          city,
+                          zipcode,
+                          country,
+                          phoneNumber,
+                          birthdate
+                        })
+                    }
+                  }
+              } className="w-full bg-pink-600 hover:bg-pink-700 text-white">Inscription</Button>
+            </div>
+          </CenteredField>
+        )
       }
     }
 
     else
     {
       content = (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-          <input
-            type="password"
-            placeholder="Mot de passe ?"
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full max-w-md px-4 py-2 mb-4 text-base border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-          <button onClick={() => signIn("credentials",
-            {
-              redirect: false,
-              email,
-              password
-            }).then((res) => {
-              if(!res?.ok)
-              {
-                setError("Mauvais mot de passe");
-              }
-            })}
-            className="w-full max-w-md px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Se connecter
-          </button>
-          {error && <p style={{ color: "red" }}>{error}</p>}
-        </div>)
+        <CenteredField>
+          <div className="space-y-4">
+            <Label htmlFor="password">Entrer mot de passe</Label>
+            <div className="flex items-center">
+              <Lock className="w-5 h-5 text-gray-400 mr-2" />
+              <Input
+                id="password"
+                type="password"
+                onChange={(e) => setPassword(e.target.value)}
+                className="flex-grow"
+              />
+            </div>
+            <Button onClick={() => signIn("credentials",
+                {
+                  redirect: false,
+                  email,
+                  password
+                }).then((res) => {
+                  if(!res?.ok)
+                  {
+                    setError("Mauvais mot de passe");
+                  }
+                })
+              } className="w-full bg-pink-600 hover:bg-pink-700 text-white">Connexion</Button>
+          </div>
+        </CenteredField>
+      )
     }
   }
 
