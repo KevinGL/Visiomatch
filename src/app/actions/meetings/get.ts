@@ -104,3 +104,45 @@ export const getUserNextMeetings = async () =>
 
     return JSON.stringify(meetings);
 }
+
+export const getMeetings = async () =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    //console.log(session.user.id);
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return "";
+    }
+
+    if(!currentUser.data().admin)
+    {
+        return "";
+    }
+    
+    const meetingsSnapshot = await db.collection("meetings").get();
+
+    let meetings = meetingsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        age: doc.data().age,
+        orientation: doc.data().orientation,
+        participants: doc.data().participants.length,
+        region: doc.data().region,
+        date: doc.data().date._seconds * 1000
+    }));
+
+    meetings = meetings.sort((a, b) => { return a.date > b.date ? 1 : -1 });
+
+    //console.log(currentUser.data());
+
+    return JSON.stringify(meetings);
+}

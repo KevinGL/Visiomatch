@@ -57,7 +57,8 @@ export const authOptions =
                   zipcode: credentials?.zipcode,
                   country: credentials?.country,
                   phoneNumber: credentials?.phoneNumber,
-                  birthdate: credentials?.birthdate
+                  birthdate: credentials?.birthdate,
+                  admin: false
                 });
   
                 return { id: newUser.id, email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate };

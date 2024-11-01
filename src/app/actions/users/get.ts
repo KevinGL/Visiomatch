@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
 //import { metadata } from "@/app/layout";
 
-export const updateProfile = async (req: any) =>
+export const getCurrentUser = async () =>
 {
     const session = await getServerSession(authOptions);
     
@@ -22,7 +22,7 @@ export const updateProfile = async (req: any) =>
         return "";
     }
 
-    /*const res =
+    const res =
     {
         birthdate: currentUser.data()?.birthdate,
         email: currentUser.data()?.email,
@@ -33,21 +33,8 @@ export const updateProfile = async (req: any) =>
         zipcode: currentUser.data()?.zipcode,
         country: currentUser.data()?.country,
         phoneNumber: currentUser.data()?.phoneNumber,
+        admin: currentUser.data()?.admin
     }
 
-    return JSON.stringify(res);*/
-
-    //console.log(req);
-
-    userRef.update({
-        email: req.email,
-        name: req.name,
-        birthdate: req.dateOfBirth,
-        city: req.city,
-        zipcode: req.postalCode,
-        country: req.country,
-        phoneNumber: req.phoneNumber,
-        gender: req.gender,
-        search: req.search
-    });
+    return JSON.stringify(res);
 }
