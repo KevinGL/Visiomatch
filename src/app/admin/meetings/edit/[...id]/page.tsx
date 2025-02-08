@@ -70,6 +70,7 @@ export default function EditMeetingForm({ params }: any) {
     .then(() =>
     {
         alert("Séance mise à jour");
+        router.push("/admin/meetings");
     })
     .catch((res) =>
     {

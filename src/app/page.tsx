@@ -2,7 +2,7 @@
 
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { checkExists } from './actions/checkExists';
+import { checkExists } from './actions/users/checkExists';
 import { useEffect, useState } from 'react';
 import { setServers } from 'dns';
 import { Home } from './components/Home';

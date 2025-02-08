@@ -25,7 +25,7 @@ export const getMeetingsFiltered = async () =>
         return "";
     }
     
-    const meetingsSnapshot = await db.collection("meetings").get();
+    /*const meetingsSnapshot = await db.collection("meetings").get();
 
     const meetings: Meeting[] = meetingsSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -52,7 +52,100 @@ export const getMeetingsFiltered = async () =>
         return m.orientation == orientation && date.getTime() > Date.now();
     });
 
-    return JSON.stringify(meetingsFiltered);
+    return JSON.stringify(meetingsFiltered);*/
+
+    const date = new Date(Date.now());
+
+    //console.log(date.getDay());
+
+    const ages: string[] =
+    [
+        "18 - 25",
+        "26 - 35",
+        "36 - 45",
+        "46 - 55",
+        "56 and more"
+    ];
+
+    const regions: string[] =
+    [
+        "NO",
+        "NE",
+        "SE",
+        "SO"
+    ];
+
+    let meetings = [];
+
+    const currentDay: number = date.getDay() == 0 ? 7 : date.getDay();
+    const currentDate: number = date.getDate();
+    const currentMonth: number = date.getMonth() + 1;
+    const currentYear: number = date.getFullYear();
+
+    const currentDate2 = currentDate.toLocaleString('en-US', {
+        minimumIntegerDigits: 2,
+        useGrouping: false
+      });
+
+    const currentMonth2 = currentMonth.toLocaleString('en-US', {
+        minimumIntegerDigits: 2,
+        useGrouping: false
+      });
+
+    const today: Date = new Date(`${currentYear}-${currentMonth2}-${currentDate2}T20:00:00`);
+
+    //console.log(today.getTime());
+    let timestamp = today.getTime();
+
+    for(let i = currentDay ; i <= 7 ; i++)
+    {
+        if(i == 2 || i == 4 || i == 7)
+        {
+            ages.forEach((age: string) =>
+            {
+                regions.forEach((region: string) =>
+                {
+                    const orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
+                    
+                    meetings.push({
+                        age: age,
+                        date: new Date(timestamp),
+                        orientation: orientation,
+                        region: region
+                    });
+                });
+            });
+        }
+
+        timestamp += 24 * 3600 * 1000;
+    }
+
+    for(let i = 1 ; i <= 7 ; i++)       //Next week
+    {
+        if(i == 2 || i == 4 || i == 7)
+        {
+            ages.forEach((age: string) =>
+            {
+                regions.forEach((region: string) =>
+                {
+                    const orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
+                    
+                    meetings.push({
+                        age: age,
+                        date: new Date(timestamp),
+                        orientation: orientation,
+                        region: region
+                    });
+                });
+            });
+        }
+
+        timestamp += 24 * 3600 * 1000;
+    }
+
+    console.log(meetings);
+
+    return JSON.stringify(meetings);
 }
 
 export const getMeetingById = async (id: string) =>

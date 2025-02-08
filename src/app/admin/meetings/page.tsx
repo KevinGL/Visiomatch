@@ -27,6 +27,7 @@ import { useRouter } from "next/navigation";
 import { getMeetings } from "@/app/actions/meetings/get";
 import { delMeeting } from "@/app/actions/meetings/post";
 import { error } from "console";
+import { autoRenawalMeeting } from "@/app/actions/meetings/auto_renewal";
 
 // Sample data for meetings
 const meetings = [];
@@ -81,6 +82,16 @@ export default function AdminPage() {
                     <div>
                         <Button className="bg-pink-600 hover:bg-pink-700 text-white" onClick={() => router.push("/admin/meetings/add")}>
                             <Plus className="mr-2 h-4 w-4" /> Ajouter une séance
+                        </Button>
+                    </div>
+                    <div>
+                        <Button className="bg-pink-600 hover:bg-pink-700 text-white" onClick={async () => await autoRenawalMeeting(true)}>
+                            <Plus className="mr-2 h-4 w-4" /> Activer le renouvellement automatique
+                        </Button>
+                    </div>
+                    <div>
+                        <Button className="bg-pink-600 hover:bg-pink-700 text-white" onClick={async () => await autoRenawalMeeting(false)}>
+                            <Plus className="mr-2 h-4 w-4" /> Désactiver le renouvellement automatique
                         </Button>
                     </div>
                 </div>

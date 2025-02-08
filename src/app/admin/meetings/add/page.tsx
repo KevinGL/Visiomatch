@@ -37,6 +37,7 @@ export default function AddMeetingForm() {
     .then(() =>
     {
         alert("Séance ajoutée");
+        router.push("/admin/meetings");
     })
     .catch((res) =>
     {
