@@ -3,9 +3,10 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
+import { orientations } from "@/app/api/variables/meetings";
 //import { metadata } from "@/app/layout";
 
-export const addCurrentuserToMeeting = async (id: string) =>
+export const addCurrentuserToMeeting = async (meeting: any) =>
 {
     try
     {
@@ -16,43 +17,21 @@ export const addCurrentuserToMeeting = async (id: string) =>
             return { success: false, message: "Unauthenticated" };
         }
         
-        const ref = db.collection("meetings").doc(id);
-        const meeting = (await ref.get()).data();
-        
-        const meetingsRef = db.collection("meetings");
-        const querySnapshot = await meetingsRef.get();
+        const userRef = db.collection("users").doc(session.user.id);
+        const currentUser = (await userRef.get()).data();
 
-        let sameTime = false;
-        
-        querySnapshot.forEach((doc) =>
+        //console.log(meeting);
+
+        let orientation: string = `${currentUser.gender}_${currentUser.search}`;
+
+        if(orientation == "woman_man")
         {
-            if(doc.id != id && doc.data().participants.indexOf(session.user.id) != -1 && meeting?.date._seconds == doc.data().date._seconds)
-            {
-                sameTime = true;
-            }
-        });
-
-        if(meeting)
-        {
-            if(meeting.participants.indexOf(session.user.id) != -1)
-            {
-                return { success: false, message: "Vous êtes déjà inscrit à cette séance" };
-            }
-
-            else
-            if(sameTime)
-            {
-                return { success: false, message: "Vous ne pouvez pas vous inscrire à deux séances simultanées" };
-            }
-
-            else
-            {
-                meeting.participants.push(session.user.id);
-                await ref.update({ participants: meeting.participants });
-    
-                return { success: true, message: "Confirmation de votre inscription" };
-            }
+            orientation = "man_woman";
         }
+
+        currentUser.participations.push({ date: meeting.date, region: meeting.region, ageRange: meeting.ageRange, orientation: orientation });
+        //console.log(currentUser.participations);
+        await userRef.update({ participations: currentUser.participations });
     }
     catch (error: any)
     {

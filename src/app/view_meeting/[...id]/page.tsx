@@ -13,7 +13,7 @@ import { addCurrentuserToMeeting, delCurrentuserToMeeting } from '@/app/actions/
 import { useSession } from 'next-auth/react'
 import AuthGuard from '@/app/components/AuthGuard'
 
-export default function MeetingView({ params }: any)
+export default function aa({ params }: any)
 {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isModalOpen2, setIsModalOpen2] = useState(false);

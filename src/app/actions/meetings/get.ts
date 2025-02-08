@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
 import { meetingDuration } from "@/app/api/variables/meetings";
 import { Meeting } from "@/app/types";
+import { time } from "console";
 
 export const getMeetingsFiltered = async () =>
 {
@@ -24,6 +25,8 @@ export const getMeetingsFiltered = async () =>
     {
         return "";
     }
+
+    const users = await db.collection("users").get();
     
     /*const meetingsSnapshot = await db.collection("meetings").get();
 
@@ -64,7 +67,7 @@ export const getMeetingsFiltered = async () =>
         "26 - 35",
         "36 - 45",
         "46 - 55",
-        "56 and more"
+        "> 56"
     ];
 
     const regions: string[] =
@@ -105,13 +108,25 @@ export const getMeetingsFiltered = async () =>
             {
                 regions.forEach((region: string) =>
                 {
-                    const orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
-                    
+                    let orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
+
+                    if(orientation == "woman_man")
+                    {
+                        orientation = "man_woman";
+                    }
+
+                    let participants = [];
+
+                    getParticipants(users.docs, age, region, orientation, timestamp, session.user.id, participants);
+
+                    console.log(participants);
+
                     meetings.push({
                         age: age,
                         date: new Date(timestamp),
                         orientation: orientation,
-                        region: region
+                        region: region,
+                        participants: participants
                     });
                 });
             });
@@ -128,13 +143,27 @@ export const getMeetingsFiltered = async () =>
             {
                 regions.forEach((region: string) =>
                 {
-                    const orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
+                    let orientation: string = `${currentUser.data()?.gender}_${currentUser.data()?.search}`;
+
+                    if(orientation == "woman_man")
+                    {
+                        orientation = "man_woman";
+                    }
+
+                    const date: Date = new Date(timestamp);
+
+                    let participants = [];
+
+                    getParticipants(users.docs, age, region, orientation, timestamp, session.user.id, participants);
+
+                    //console.log(participants);
                     
                     meetings.push({
                         age: age,
-                        date: new Date(timestamp),
+                        date: date,
                         orientation: orientation,
-                        region: region
+                        region: region,
+                        participants: participants
                     });
                 });
             });
@@ -143,9 +172,47 @@ export const getMeetingsFiltered = async () =>
         timestamp += 24 * 3600 * 1000;
     }
 
-    console.log(meetings);
-
     return JSON.stringify(meetings);
+}
+
+const getParticipants = async(users: any[], age: string, region: string, orientation: string, timestamp: number, currentUser: string, participants: string[]) =>
+{
+    /*db.collection("users").get().then((users) =>
+    {
+        users.docs.map((user) =>
+        {
+            const participations = user.data().participations;
+
+            participations.map((p) =>
+            {
+                //console.log(p.region, region, p.ageRange, age, p.orientation, orientation, new Date(p.date).getTime(), timestamp);
+                
+                if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp && user.id != currentUser)
+                {
+                    participants.push(user.id);
+
+                    //console.log(p.region, p.ageRange, p.orientation);
+                }
+            });
+        });
+    });*/
+
+    users.map((user) =>
+    {
+        const participations = user.data().participations;
+
+        participations.map((p) =>
+        {
+            //console.log(p.region, region, p.ageRange, age, p.orientation, orientation, new Date(p.date).getTime(), timestamp);
+            
+            if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp && user.id != currentUser)
+            {
+                participants.push(user.id);
+
+                //console.log(p.region, p.ageRange, p.orientation);
+            }
+        });
+    });
 }
 
 export const getMeetingById = async (id: string) =>
