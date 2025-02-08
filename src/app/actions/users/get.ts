@@ -38,3 +38,37 @@ export const getCurrentUser = async () =>
 
     return JSON.stringify(res);
 }
+
+export const getIfSubscribed = async(meeting: any) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return false;
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return false;
+    }
+
+    let orientation: string = `${currentUser.data().gender}_${currentUser.data().search}`;
+
+    if(orientation == "woman_man")
+    {
+        orientation = "man_woman";
+    }
+
+    const isAlreadyRegistered = currentUser.data().participations.some(p => 
+        p.date === meeting.date &&
+        p.region === meeting.region &&
+        p.ageRange === meeting.ageRange &&
+        p.orientation === orientation
+    );
+
+    return isAlreadyRegistered;
+}

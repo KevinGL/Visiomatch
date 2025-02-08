@@ -33,7 +33,7 @@ export default function ProfileList() {
                     const path = `/img/meetings/${d.orientation}/${images[indexImg]}`;
                     
                     meetings2.push({
-                        id: d.id,
+                        //id: d.id,
                         date: d.date,
                         ageRange: d.age,
                         region: d.region,
@@ -98,7 +98,10 @@ export default function ProfileList() {
                 {
                     idMeeting != -1 &&
 
-                    <MeetingView meeting={meetings[idMeeting]} />
+                    <>
+                        <button className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded mb-10" onClick={ () => setIdMeeting(-1) }>Retour</button>
+                        <MeetingView meeting={meetings[idMeeting]} />
+                    </>
                 }
             </div>
         </div>

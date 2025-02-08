@@ -16,6 +16,13 @@ export const addCurrentuserToMeeting = async (meeting: any) =>
         {
             return { success: false, message: "Unauthenticated" };
         }
+
+        //meeting.date = "2025-01-09T19:00:00.000Z";
+
+        if(new Date(meeting.date).getTime() < Date.now())
+        {
+            return { success: false, message: "Séance expirée" };
+        }
         
         const userRef = db.collection("users").doc(session.user.id);
         const currentUser = (await userRef.get()).data();
@@ -29,9 +36,23 @@ export const addCurrentuserToMeeting = async (meeting: any) =>
             orientation = "man_woman";
         }
 
+        const isAlreadyRegistered = currentUser.participations.some(p => 
+            p.date === meeting.date &&
+            p.region === meeting.region &&
+            p.ageRange === meeting.ageRange &&
+            p.orientation === orientation
+        );
+
+        if(isAlreadyRegistered)
+        {
+            return { success: false, message: "Vous êtes déjà inscrit à cette séance" };
+        }
+
         currentUser.participations.push({ date: meeting.date, region: meeting.region, ageRange: meeting.ageRange, orientation: orientation });
         //console.log(currentUser.participations);
         await userRef.update({ participations: currentUser.participations });
+
+        return { success: true, message: "Séance réservée" };
     }
     catch (error: any)
     {
@@ -39,7 +60,7 @@ export const addCurrentuserToMeeting = async (meeting: any) =>
     }
 }
 
-export const delCurrentuserToMeeting = async (id: string) =>
+export const delCurrentuserToMeeting = async (meeting) =>
 {
     try
     {
@@ -49,21 +70,29 @@ export const delCurrentuserToMeeting = async (id: string) =>
         {
             return { success: false, message: "Unauthenticated" };
         }
-        
-        const ref = db.collection("meetings").doc(id);
 
-        let meeting = (await ref.get()).data();
+        const userRef = db.collection("users").doc(session.user.id);
+        const currentUser = (await userRef.get()).data();
 
-        const index: number = meeting?.participants.indexOf(id);
+        let orientation: string = `${currentUser.gender}_${currentUser.search}`;
 
-        if(meeting && index == -1)
+        if(orientation == "woman_man")
         {
-            meeting.participants.splice(index, 1);
-            
-            await ref.update({ participants: meeting.participants });
-
-            return { success: true, message: "Confirmation de l'annulation" };
+            orientation = "man_woman";
         }
+        
+        const index = currentUser.participations.findIndex(p => 
+            p.date === meeting.date &&
+            p.region === meeting.region &&
+            p.ageRange === meeting.ageRange &&
+            p.orientation === orientation
+        );
+
+        currentUser.participations.splice(index, 1);
+
+        await userRef.update({ participations: currentUser.participations });
+
+        return { success: true, message: "Séance annulée" };
     }
     catch (error: any)
     {

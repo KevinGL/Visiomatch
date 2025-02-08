@@ -58,7 +58,8 @@ export const authOptions =
                   country: credentials?.country,
                   phoneNumber: credentials?.phoneNumber,
                   birthdate: credentials?.birthdate,
-                  admin: false
+                  admin: false,
+                  participations: []
                 });
   
                 return { id: newUser.id, email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate };

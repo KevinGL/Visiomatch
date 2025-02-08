@@ -119,7 +119,7 @@ export const getMeetingsFiltered = async () =>
 
                     getParticipants(users.docs, age, region, orientation, timestamp, session.user.id, participants);
 
-                    console.log(participants);
+                    //console.log(participants);
 
                     meetings.push({
                         age: age,
@@ -205,7 +205,8 @@ const getParticipants = async(users: any[], age: string, region: string, orienta
         {
             //console.log(p.region, region, p.ageRange, age, p.orientation, orientation, new Date(p.date).getTime(), timestamp);
             
-            if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp && user.id != currentUser)
+            //if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp && user.id != currentUser)
+            if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp)
             {
                 participants.push(user.id);
 
@@ -254,7 +255,7 @@ export const getUserNextMeetings = async () =>
 
     (await meetingsSnapshot.get()).docs.map((m: any) =>
     {
-        console.log(Date.now(), m.data().date._seconds * 1000 + meetingDuration);
+        //console.log(Date.now(), m.data().date._seconds * 1000 + meetingDuration);
 
         if(Date.now() <= m.data().date._seconds * 1000 + meetingDuration)
         {
