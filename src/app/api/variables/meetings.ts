@@ -1,9 +1,24 @@
-export const regions = new Map<string, string>();
-
-regions.set("SE", "Sud-est");
-regions.set("NE", "Nord-est");
-regions.set("NO", "Nord-ouest");
-regions.set("SO", "Sud-ouest");
+export const regions: string[] =
+[
+    "Auvergne-Rhône-Alpes",
+    "Bourgogne-Franche-Comté",
+    "Bretagne",
+    "Centre-Val de Loire",
+    "Corse",
+    "Grand Est",
+    "Guadeloupe",
+    "Guyane",
+    "Hauts-de-France",
+    "Île-de-France",
+    "La Réunion",
+    "Martinique",
+    "Mayotte",
+    "Normandie",
+    "Nouvelle-Aquitaine",
+    "Occitanie",
+    "Pays de la Loire",
+    "Provence-Alpes-Côte d'Azur"
+]
 
 export const imgPaths = new Map<string, string[]>();
 

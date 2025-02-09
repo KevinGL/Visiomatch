@@ -13,11 +13,13 @@ import { useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 
 // This is a mock function to simulate sending a message
-const sendMessage = (message: string) => {
+const sendMessage = (message: string) =>
+{
   console.log('Sending message:', message)
 }
 
-export default function VideoConference({ params }: any) {
+export default function VideoConference({ params }: any)
+{
   const [isMuted, setIsMuted] = React.useState(false)
   const [isVideoOn, setIsVideoOn] = React.useState(true)
   const [isChatOpen, setIsChatOpen] = React.useState(false)
@@ -50,7 +52,7 @@ export default function VideoConference({ params }: any) {
     }, []);
 
   return (
-    <AllowDoMeeting id={params.id[0]}>
+    <AllowDoMeeting meeting={params}>
         <div className="min-h-screen bg-pink-50">
             <Navbar />
             <div className="container mx-auto p-4 h-screen flex flex-col">

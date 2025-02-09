@@ -7,7 +7,7 @@ import { CalendarDays, MapPin, Users, Video, X } from 'lucide-react'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { useEffect, useState } from 'react'
 import { getUserNextMeetings } from '../actions/meetings/get'
-import { imgPaths, meetingDuration, regions } from '../api/variables/meetings'
+import { imgPaths, meetingDuration, orientations, regions } from '../api/variables/meetings'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { delCurrentuserToMeeting } from '../actions/meetings/post'
@@ -35,12 +35,12 @@ export default function MeetingsList() {
               const date = new Date(d.date);
               const imageUrl: string = `/img/meetings/${d.orientation}/${pathsArray[indexPath]}`;
 
-              meetings2.push({ id: d.id, imageUrl, ageGroup: d.ageRange, participants: d.participants, title: `Le ${date.toLocaleDateString('fr-FR',
+              meetings2.push({ id: d.id, imageUrl, ageGroup: d.ageRange, participants: d.participants, orientation: d.orientation, title: `Le ${date.toLocaleDateString('fr-FR',
                 { 
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
-                })}` , region: regions.get(d.region), date });
+                })}` , region: d.region, date });
             });
           
             setMeetings(meetings2);
@@ -102,10 +102,10 @@ export default function MeetingsList() {
                 <CardFooter>
                   <Button 
                     className="w-full bg-pink-600 hover:bg-pink-700 text-white"
-                    onClick={() => router.push(`/do_meeting/${meeting.id}`)}
+                    onClick={() => router.push(`/do_meeting/${meeting.ageGroup}/${new Date(meeting.date).getTime()}/${meeting.orientation}/${meeting.region}`)}
                   >
                     <Video className="mr-2 h-4 w-4" />
-                    Accéder à la séance !
+                      Accéder à la séance !
                   </Button>
                 </CardFooter>
               }

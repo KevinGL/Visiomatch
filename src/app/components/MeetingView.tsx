@@ -62,10 +62,7 @@ export default function MeetingView({ meeting }: any)
                     </div>
                     <div className="flex items-center text-gray-600">
                         <MapPin className="mr-2 h-5 w-5" />
-                        {localMeeting.region == "NO" && <>Nord-ouest</>}
-                        {localMeeting.region == "NE" && <>Nord-est</>}
-                        {localMeeting.region == "SE" && <>Sud-est</>}
-                        {localMeeting.region == "SP" && <>Sud-ouest</>}
+                        {localMeeting.region}
                     </div>
                     <div className="flex items-center text-gray-600">
                         <User className="mr-2 h-5 w-5" />

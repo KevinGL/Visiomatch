@@ -1,11 +1,11 @@
 import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getMeetingById } from "../actions/meetings/get";
+import { getMeetingById, getUserNextMeetings, validDoMeeting } from "../actions/meetings/get";
 import { Meeting } from "../types";
-import { meetingDuration } from "../api/variables/meetings";
+import { meetingDuration, orientations } from "../api/variables/meetings";
 
-export default function AllowDoMeeting({ children, id }: any)
+export default function AllowDoMeeting({ children, meeting }: any)
 {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -16,17 +16,22 @@ export default function AllowDoMeeting({ children, id }: any)
         {
             router.push("/");
         }
+
+        //console.log(meeting.params);
         
         if(status === "authenticated" && session?.user)
         {
-            getMeetingById(id).then((res: string) =>
+            validDoMeeting({ ageRange: meeting.params[0], date: parseInt(meeting.params[1]), orientation: meeting.params[2], region: meeting.params[3] })
+            .then((res) =>
             {
-                const meeting = JSON.parse(res);
-                
-                if (meeting.participants.indexOf(session.user?.id) == -1 || Date.now() < meeting.date._seconds * 1000 || Date.now() > meeting.date._seconds * 1000 + meetingDuration)
+                if(!res.success)
                 {
                     router.push("/");
                 }
+            })
+            .catch(() =>
+            {
+                router.push("/");
             });
         }
     }, [status, router]);

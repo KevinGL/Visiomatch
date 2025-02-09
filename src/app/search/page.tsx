@@ -83,10 +83,7 @@ export default function ProfileList() {
                                 </p>
                                 <p className="text-gray-600 flex items-center">
                                     <MapPin className="mr-2 h-4 w-4" />
-                                    {m.region == "NO" && "Nord-ouest"}
-                                    {m.region == "NE" && "Nord-est"}
-                                    {m.region == "SE" && "Sud-est"}
-                                    {m.region == "SO" && "Sud-ouest"}
+                                    {m.region}
                                 </p>
                                 </div>
                             </div>

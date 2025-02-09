@@ -3,7 +3,7 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
-import { meetingDuration } from "@/app/api/variables/meetings";
+import { meetingDuration, regions } from "@/app/api/variables/meetings";
 import { Meeting } from "@/app/types";
 import { time } from "console";
 
@@ -70,14 +70,6 @@ export const getMeetingsFiltered = async () =>
         "> 56"
     ];
 
-    const regions: string[] =
-    [
-        "NO",
-        "NE",
-        "SE",
-        "SO"
-    ];
-
     let meetings = [];
 
     const currentDay: number = date.getDay() == 0 ? 7 : date.getDay();
@@ -95,10 +87,10 @@ export const getMeetingsFiltered = async () =>
         useGrouping: false
       });
 
-    const today: Date = new Date(`${currentYear}-${currentMonth2}-${currentDate2}T20:00:00`);
+    const today20: Date = new Date(`${currentYear}-${currentMonth2}-${currentDate2}T20:00:00`);
 
     //console.log(today.getTime());
-    let timestamp = today.getTime();
+    let timestamp = today20.getTime();
 
     for(let i = currentDay ; i <= 7 ; i++)
     {
@@ -121,13 +113,16 @@ export const getMeetingsFiltered = async () =>
 
                     //console.log(participants);
 
-                    meetings.push({
-                        age: age,
-                        date: new Date(timestamp),
-                        orientation: orientation,
-                        region: region,
-                        participants: participants
-                    });
+                    if(Date.now() <= timestamp)
+                    {
+                        meetings.push({
+                            age: age,
+                            date: new Date(timestamp),
+                            orientation: orientation,
+                            region: region,
+                            participants: participants
+                        });
+                    }
                 });
             });
         }
@@ -157,14 +152,17 @@ export const getMeetingsFiltered = async () =>
                     getParticipants(users.docs, age, region, orientation, timestamp, participants);
 
                     //console.log(participants);
-                    
-                    meetings.push({
-                        age: age,
-                        date: date,
-                        orientation: orientation,
-                        region: region,
-                        participants: participants
-                    });
+
+                    if(Date.now() <= timestamp)
+                    {
+                        meetings.push({
+                            age: age,
+                            date: date,
+                            orientation: orientation,
+                            region: region,
+                            participants: participants
+                        });
+                    }
                 });
             });
         }
@@ -269,12 +267,12 @@ export const getUserNextMeetings = async () =>
 
     currentUser.data().participations.map((p: any) =>
     {
-        if(new Date(p.date).getTime() > Date.now())
+        if(new Date(p.date).getTime() + meetingDuration > Date.now())
         {
             let participants = [];
 
             getParticipants(users.docs, p.ageRange, p.region, p.orientation, new Date(p.date).getTime(), participants);
-            
+
             meetings.push({
                 ...p,
                 participants: participants
@@ -325,4 +323,42 @@ export const getMeetings = async () =>
     //console.log(currentUser.data());
 
     return JSON.stringify(meetings);
+}
+
+export const validDoMeeting = async (meeting) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return { success: false, message: "Unauthenticated" };
+    }
+
+    if(meeting.date + meetingDuration < Date.now())
+    {
+        return { success: false, message: "Séance expirée" };
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = (await userRef.get()).data();
+
+    const registered = currentUser.participations.some(p => 
+        {
+            //console.log((new Date(p.date)).getTime(), meeting.date, p.region, meeting.region, p.ageRange, meeting.ageRange, p.orientation, meeting.orientation);
+
+            return(
+                (new Date(p.date)).getTime() === meeting.date &&
+                p.region === meeting.region &&
+                p.ageRange === meeting.ageRange &&
+                p.orientation === meeting.orientation
+            )
+        }
+    );
+
+    if(!registered)
+    {
+        return { success: false, message: "Vous n'êtes pas inscrit à cette séance" };
+    }
+
+    return { success: true, message: "OK" };
 }
