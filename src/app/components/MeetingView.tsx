@@ -211,7 +211,7 @@ export default function MeetingView({ meeting }: any)
                                 
                                 const index: number = meeting.participants.indexOf(session?.user.id);
 
-                                if(index == -1)
+                                if(index != -1)
                                 {
                                     meeting2.participants.splice(index, 1);
                                     setLocalMeeting(meeting2);

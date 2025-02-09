@@ -117,7 +117,7 @@ export const getMeetingsFiltered = async () =>
 
                     let participants = [];
 
-                    getParticipants(users.docs, age, region, orientation, timestamp, session.user.id, participants);
+                    getParticipants(users.docs, age, region, orientation, timestamp, participants);
 
                     //console.log(participants);
 
@@ -154,7 +154,7 @@ export const getMeetingsFiltered = async () =>
 
                     let participants = [];
 
-                    getParticipants(users.docs, age, region, orientation, timestamp, session.user.id, participants);
+                    getParticipants(users.docs, age, region, orientation, timestamp, participants);
 
                     //console.log(participants);
                     
@@ -175,45 +175,42 @@ export const getMeetingsFiltered = async () =>
     return JSON.stringify(meetings);
 }
 
-const getParticipants = async(users: any[], age: string, region: string, orientation: string, timestamp: number, currentUser: string, participants: string[]) =>
+//const getParticipants = async(users: any[], age: string, region: string, orientation: string, timestamp: number, currentUser: string, participants: string[]) =>
+const getParticipants = (users: any[], age: string, region: string, orientation: string, timestamp: number, participants: string[]) =>
 {
-    /*db.collection("users").get().then((users) =>
-    {
-        users.docs.map((user) =>
-        {
-            const participations = user.data().participations;
-
-            participations.map((p) =>
-            {
-                //console.log(p.region, region, p.ageRange, age, p.orientation, orientation, new Date(p.date).getTime(), timestamp);
-                
-                if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp && user.id != currentUser)
-                {
-                    participants.push(user.id);
-
-                    //console.log(p.region, p.ageRange, p.orientation);
-                }
-            });
-        });
-    });*/
-
     users.map((user) =>
     {
         const participations = user.data().participations;
 
         participations.map((p) =>
         {
-            //console.log(p.region, region, p.ageRange, age, p.orientation, orientation, new Date(p.date).getTime(), timestamp);
-            
             //if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp && user.id != currentUser)
             if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp)
             {
                 participants.push(user.id);
-
-                //console.log(p.region, p.ageRange, p.orientation);
             }
         });
     });
+}
+
+const getNumParticipants = (users: any[], age: string, region: string, orientation: string, timestamp: number) =>
+{
+    let numParticipants: number = 0;
+    
+    users.map((user) =>
+    {
+        const participations = user.data().participations;
+
+        participations.map((p) =>
+        {
+            if(p.region == region && p.ageRange == age && p.orientation == orientation && new Date(p.date).getTime() == timestamp)
+            {
+                numParticipants++;
+            }
+        });
+    });
+
+    return numParticipants;
 }
 
 export const getMeetingById = async (id: string) =>
@@ -237,6 +234,15 @@ export const getMeetingById = async (id: string) =>
     
     const meetingsSnapshot = db.collection("meetings").doc(id);
 
+    let meetings = [];
+
+    console.log((await meetingsSnapshot.get()).data());
+
+    (await meetingsSnapshot.get()).data().map((m) =>
+    {
+        console.log(m);
+    });
+
     return JSON.stringify((await meetingsSnapshot.get()).data());
 }
 
@@ -249,17 +255,30 @@ export const getUserNextMeetings = async () =>
         return "";
     }
 
-    const meetingsSnapshot = db.collection("meetings").where("participants", "array-contains", session.user.id);
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
 
-    const meetings: Meeting[] = [];
-
-    (await meetingsSnapshot.get()).docs.map((m: any) =>
+    if(!currentUser.exists)
     {
-        //console.log(Date.now(), m.data().date._seconds * 1000 + meetingDuration);
+        return "";
+    }
 
-        if(Date.now() <= m.data().date._seconds * 1000 + meetingDuration)
+    const users = await db.collection("users").get();
+
+    let meetings = [];
+
+    currentUser.data().participations.map((p: any) =>
+    {
+        if(new Date(p.date).getTime() > Date.now())
         {
-            meetings.push({...m.data(), id: m.id});
+            let participants = [];
+
+            getParticipants(users.docs, p.ageRange, p.region, p.orientation, new Date(p.date).getTime(), participants);
+            
+            meetings.push({
+                ...p,
+                participants: participants
+            });
         }
     });
 
