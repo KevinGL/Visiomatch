@@ -111,7 +111,7 @@ export const getMeetingsFiltered = async () =>
 
                     getParticipants(users.docs, age, region, orientation, timestamp, participants);
 
-                    //console.log(participants);
+                    //console.log(timestamp, new Date(timestamp), region);
 
                     if(Date.now() <= timestamp)
                     {
@@ -234,7 +234,7 @@ export const getMeetingById = async (id: string) =>
 
     let meetings = [];
 
-    console.log((await meetingsSnapshot.get()).data());
+    //console.log((await meetingsSnapshot.get()).data());
 
     (await meetingsSnapshot.get()).data().map((m) =>
     {
@@ -267,6 +267,8 @@ export const getUserNextMeetings = async () =>
 
     currentUser.data().participations.map((p: any) =>
     {
+        //console.log(new Date(p.date).getTime(), p.date, p.region);
+        
         if(new Date(p.date).getTime() + meetingDuration > Date.now())
         {
             let participants = [];
@@ -336,7 +338,14 @@ export const validDoMeeting = async (meeting) =>
 
     if(meeting.date + meetingDuration < Date.now())
     {
+        //console.log("Séance expirée");
         return { success: false, message: "Séance expirée" };
+    }
+
+    if(meeting.date > Date.now())
+    {
+        //console.log("Séance non démarrée");
+        return { success: false, message: "Séance non démarrée" };
     }
 
     const userRef = db.collection("users").doc(session.user.id);
