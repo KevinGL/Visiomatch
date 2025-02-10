@@ -20,6 +20,15 @@ export const regions: string[] =
     "Provence-Alpes-Côte d'Azur"
 ]
 
+export const ages: string[] =
+[
+    "18 - 25",
+    "26 - 35",
+    "36 - 45",
+    "46 - 55",
+    "> 56"
+];
+
 export const imgPaths = new Map<string, string[]>();
 
 imgPaths.set("man_woman", ["pexels-cottonbro-6789162.jpg", "pexels-jonathanborba-13780012.jpg", "pexels-leticiacurveloph-17463408.jpg"]);
@@ -32,4 +41,4 @@ orientations.set("man_woman", "Séance visio homme femme");
 orientations.set("man_man", "Séance visio homme homme");
 orientations.set("woman_woman", "Séance visio femme femme");
 
-export const meetingDuration = 3600000;
+export const meetingDuration = 7 * 24 * 3600000;//3600000;

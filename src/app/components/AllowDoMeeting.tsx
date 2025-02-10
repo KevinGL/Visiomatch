@@ -2,7 +2,6 @@ import { useSession, signIn } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getMeetingById, getUserNextMeetings, validDoMeeting } from "../actions/meetings/get";
-import { Meeting } from "../types";
 import { meetingDuration, orientations } from "../api/variables/meetings";
 
 export default function AllowDoMeeting({ children, meeting }: any)

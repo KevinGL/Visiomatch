@@ -9,8 +9,9 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import Navbar from '@/app/components/navbar'
 import AllowDoMeeting from '@/app/components/AllowDoMeeting'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
+import { orientations } from '@/app/api/variables/meetings'
 
 // This is a mock function to simulate sending a message
 const sendMessage = (message: string) =>
@@ -30,6 +31,7 @@ export default function VideoConference({ params }: any)
   ])
 
   const { data: session, status } = useSession();
+  const socketRef = useRef<WebSocket | null>(null);
 
   const handleSendMessage = () => {
     if (message.trim()) {
@@ -41,15 +43,26 @@ export default function VideoConference({ params }: any)
 
     useEffect(() =>
     {
-        /*const socket = new WebSocket('ws://localhost:8080');
-
-        socket.onopen = () =>
+        if (status === "authenticated" && session?.user.id && !socketRef.current)
         {
-            console.log('Connecté au serveur WebSocket');
+            const socket = new WebSocket('ws://localhost:8080');
+            socketRef.current = socket;
 
-            socket.send(JSON.stringify({ type: "connect", user_id: session?.user.id, meeting_id: params.id[0] }));
-        };*/
-    }, []);
+            socket.onopen = () =>
+            {
+                console.log('Connecté au serveur WebSocket');
+
+                const meetic = { age: decodeURI(params.params[0]), date: decodeURI(params.params[1]), orientation: decodeURI(params.params[2]), region: decodeURI(params.params[3]) };
+                
+                socket.send(JSON.stringify({ type: "connect", user_id: session?.user.id, ...meetic }));
+            };
+
+            socket.onmessage = (event) =>
+            {
+                console.log(event.data);
+            }
+        }
+    }, [session, status]);
 
   return (
     <AllowDoMeeting meeting={params}>

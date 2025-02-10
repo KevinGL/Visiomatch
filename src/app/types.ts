@@ -10,7 +10,7 @@ export interface User
     search: string
 }
 
-export interface Meeting
+/*export interface Meeting
 {
     id: string,
     date: Date,
@@ -18,6 +18,11 @@ export interface Meeting
     region: string,
     age: string,
     participants: User[]
+}*/
+
+export interface Session
+{
+  //
 }
 
 declare module "next-auth" {

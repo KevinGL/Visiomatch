@@ -154,10 +154,10 @@ export default function MeetingView({ meeting }: any)
                                     }
                                     
                                     setLocalMeeting(meeting2);
+                                    setAlreadyRegistered(true);
                                 }
                                 //alert('Booking confirmed!');
                                 setIsModalOpen(false);
-                                setAlreadyRegistered(true);
 
                                 //alert(res?.message);
                                 setMessageModal3(res?.message);

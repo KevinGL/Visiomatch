@@ -3,8 +3,7 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
-import { meetingDuration, regions } from "@/app/api/variables/meetings";
-import { Meeting } from "@/app/types";
+import { ages, meetingDuration, regions } from "@/app/api/variables/meetings";
 import { time } from "console";
 
 export const getMeetingsFiltered = async () =>
@@ -60,15 +59,6 @@ export const getMeetingsFiltered = async () =>
     const date = new Date(Date.now());
 
     //console.log(date.getDay());
-
-    const ages: string[] =
-    [
-        "18 - 25",
-        "26 - 35",
-        "36 - 45",
-        "46 - 55",
-        "> 56"
-    ];
 
     let meetings = [];
 
@@ -353,19 +343,20 @@ export const validDoMeeting = async (meeting) =>
 
     const registered = currentUser.participations.some(p => 
         {
-            //console.log((new Date(p.date)).getTime(), meeting.date, p.region, meeting.region, p.ageRange, meeting.ageRange, p.orientation, meeting.orientation);
+            //console.log((new Date(p.date)).getTime(), meeting.date, p.region, decodeURIComponent(meeting.region), p.ageRange, meeting.ageRange, p.orientation, meeting.orientation);
 
             return(
                 (new Date(p.date)).getTime() === meeting.date &&
-                p.region === meeting.region &&
-                p.ageRange === meeting.ageRange &&
-                p.orientation === meeting.orientation
+                p.region === decodeURIComponent(meeting.region) &&
+                p.ageRange === decodeURIComponent(meeting.ageRange) &&
+                p.orientation === decodeURIComponent(meeting.orientation)
             )
         }
     );
 
     if(!registered)
     {
+        //console.log("Vous n'êtes pas inscrit à cette séance");
         return { success: false, message: "Vous n'êtes pas inscrit à cette séance" };
     }
 
