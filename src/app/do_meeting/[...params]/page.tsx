@@ -12,6 +12,7 @@ import AllowDoMeeting from '@/app/components/AllowDoMeeting'
 import { useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { orientations } from '@/app/api/variables/meetings'
+import { getCurrentUser } from '@/app/actions/users/get'
 
 // This is a mock function to simulate sending a message
 const sendMessage = (message: string) =>
@@ -52,13 +53,30 @@ export default function VideoConference({ params }: any)
             {
                 console.log('Connecté au serveur WebSocket');
 
-                socket.send(JSON.stringify({ type: "connect", user_id: session?.user.id, session_id: params.params[0] }));
+                getCurrentUser().then((res) =>
+                {
+                    const currentUser = JSON.parse(res);
+                    const name: string = currentUser.name;
+                    const gender: string = currentUser.gender;
+
+                    socket.send(JSON.stringify({ type: "connect", user: { id: session?.user.id, name, gender, speak: false, already: [] }, session_id: params.params[0] }));
+                });
             };
 
             socket.onmessage = (event) =>
             {
-                console.log(event.data);
-            }
+                const data = JSON.parse(event.data);
+            
+                if (data.type === "match")
+                {
+                    console.log("🎯 Match trouvé !");
+                    console.log("Session ID :", data.sessionId);
+                    console.log("Rôle :", data.role);
+                    console.log("Votre Peer ID :", data.peerId);
+            
+                    //startWebRTC(data.role);
+                }
+            };
         }
     }, [session, status]);
 

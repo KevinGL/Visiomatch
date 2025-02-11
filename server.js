@@ -32,7 +32,7 @@ wss.on('connection', (ws) =>
                 orientation: values[2],
                 region: values[3],
                 date: parseInt(values[1]),
-                users: [data.user_id]
+                users: [ data.user ]
             }
 
             sessions.set(data.session_id, session);
@@ -42,27 +42,65 @@ wss.on('connection', (ws) =>
         {
             let session = sessions.get(data.session_id);
 
-            if(session.users.indexOf(data.user_id) == -1)
+            const alReadyConnected = session.users.some((user) =>
+                {
+                    //console.log(user.id, data.user.id);
+                    
+                    return(
+                        user.id == data.user.id
+                    )
+                }
+            );
+
+            //console.log(alReadyConnected);
+
+            if(!alReadyConnected)
             {
-                session.users.push(data.user_id);
+                session.users.push(data.user);
                 sessions.set(data.session_id, session);
             }
         }
 
-        console.log(sessions);
-        
-        /*if(pair.length == 0)
-        {
-            pair.push(data.user_id);
-            ws.send("Waiting");
-        }
+        //console.log(sessions);
 
-        else
-        if(pair.length == 1 && pair.indexOf(data.user_id) == -1)
+        sessions.forEach((session, id) =>
         {
-            pair.push(data.user_id);
-            ws.send("Start conversation");
-        }*/
+            if(session.users.length >= 2)
+            {
+                //console.log(session.users);
+                let interlocutors = [];
+
+                if(session.orientation == "man_woman")
+                {
+                    interlocutors = session.users.filter((interlocutor) =>
+                    {
+                        //console.log(interlocutor);
+                        
+                        return(interlocutor.gender != data.user.gender && !interlocutor.speak && data.user.already.indexOf(interlocutor.id) == -1);
+                    });
+                }
+
+                else
+                {
+                    //
+                }
+
+                //console.log(interlocutors);
+
+                const index = Math.floor(Math.random() * interlocutors.length);
+
+                //console.log(interlocutors.length, index);
+
+                //MATCHING
+                data.user.speak = true;
+                //interlocutors[index].speak = true;
+
+                data.user.already.push(interlocutors[index].id);
+                //interlocutors[index].already.push(data.user.id);
+
+                ws.send(JSON.stringify({ type: "match", sessionId: data.session_id, peerId: interlocutors[index].id, role: !interlocutors[index].speak ? "caller" : "callee" }));
+            }
+        });
     });
 
     /*if (waitingUser)
