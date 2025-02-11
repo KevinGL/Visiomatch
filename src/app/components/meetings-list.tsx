@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
 import { delCurrentuserToMeeting } from '../actions/meetings/post'
 import { useSession } from 'next-auth/react'
+import { generateId } from '../utils'
 
 export default function MeetingsList() {
 
@@ -102,7 +103,13 @@ export default function MeetingsList() {
                 <CardFooter>
                   <Button 
                     className="w-full bg-pink-600 hover:bg-pink-700 text-white"
-                    onClick={() => router.push(`/do_meeting/${meeting.ageGroup}/${new Date(meeting.date).getTime()}/${meeting.orientation}/${meeting.region}`)}
+                    onClick={() =>
+                      {
+                        const values = [meeting.ageGroup, meeting.date?.getTime(), meeting.orientation, meeting.region];
+                        const id: string = generateId(values);
+                        router.push(`/do_meeting/${id}`);
+                      }
+                    }
                   >
                     <Video className="mr-2 h-4 w-4" />
                       Accéder à la séance !

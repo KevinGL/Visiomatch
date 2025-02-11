@@ -3,8 +3,9 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
-import { ages, meetingDuration, regions } from "@/app/api/variables/meetings";
+import { ages, meetingDuration, orientations, regions } from "@/app/api/variables/meetings";
 import { time } from "console";
+import { decodeId } from "@/app/utils";
 
 export const getMeetingsFiltered = async () =>
 {
@@ -317,7 +318,7 @@ export const getMeetings = async () =>
     return JSON.stringify(meetings);
 }
 
-export const validDoMeeting = async (meeting) =>
+export const validDoMeeting = async (id) =>
 {
     const session = await getServerSession(authOptions);
     
@@ -325,6 +326,16 @@ export const validDoMeeting = async (meeting) =>
     {
         return { success: false, message: "Unauthenticated" };
     }
+
+    const values = decodeId(id)[0].split(",");
+
+    const meeting =
+    {
+        ageRange: values[0],
+        date: parseInt(values[1]),
+        orientation: values[2],
+        region: values[3]
+    };
 
     if(meeting.date + meetingDuration < Date.now())
     {

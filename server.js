@@ -1,4 +1,12 @@
 import { WebSocketServer } from 'ws';
+import crypto from "crypto";
+
+function decodeId(id)
+{
+    const decipher = crypto.createDecipher("aes-256-ctr", "#Ge*wLajd/aln5)I(rQbf6hSa_B(wr:4");
+    const decrypted = decipher.update(id, "hex", "utf8") + decipher.final("utf8");
+    return decrypted.split("|");
+}
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -12,31 +20,32 @@ wss.on('connection', (ws) =>
     {
         const data = JSON.parse(message);
 
-        const values = [data.age, data.orientation, data.region];
-        const id = btoa(values.join("|"));
+        const values = decodeId(data.session_id)[0].split(",");
 
-        if(!sessions.get(id))
+        //console.log(values);
+
+        if(!sessions.get(data.session_id))
         {
             const session =
             {
-                age: data.age,
-                orientation: data.orientation,
-                region: data.region,
-                date: parseInt(data.date),
+                age: values[0],
+                orientation: values[2],
+                region: values[3],
+                date: parseInt(values[1]),
                 users: [data.user_id]
             }
 
-            sessions.set(id, session);
+            sessions.set(data.session_id, session);
         }
 
         else
         {
-            let session = sessions.get(id);
+            let session = sessions.get(data.session_id);
 
             if(session.users.indexOf(data.user_id) == -1)
             {
                 session.users.push(data.user_id);
-                sessions.set(id, session);
+                sessions.set(data.session_id, session);
             }
         }
 

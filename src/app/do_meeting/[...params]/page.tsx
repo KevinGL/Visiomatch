@@ -52,9 +52,7 @@ export default function VideoConference({ params }: any)
             {
                 console.log('Connecté au serveur WebSocket');
 
-                const meetic = { age: decodeURI(params.params[0]), date: decodeURI(params.params[1]), orientation: decodeURI(params.params[2]), region: decodeURI(params.params[3]) };
-                
-                socket.send(JSON.stringify({ type: "connect", user_id: session?.user.id, ...meetic }));
+                socket.send(JSON.stringify({ type: "connect", user_id: session?.user.id, session_id: params.params[0] }));
             };
 
             socket.onmessage = (event) =>
@@ -65,7 +63,7 @@ export default function VideoConference({ params }: any)
     }, [session, status]);
 
   return (
-    <AllowDoMeeting meeting={params}>
+    <AllowDoMeeting idMeeting={params}>
         <div className="min-h-screen bg-pink-50">
             <Navbar />
             <div className="container mx-auto p-4 h-screen flex flex-col">

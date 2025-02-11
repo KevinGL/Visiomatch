@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { getMeetingById, getUserNextMeetings, validDoMeeting } from "../actions/meetings/get";
 import { meetingDuration, orientations } from "../api/variables/meetings";
 
-export default function AllowDoMeeting({ children, meeting }: any)
+export default function AllowDoMeeting({ children, idMeeting }: any)
 {
     const { data: session, status } = useSession();
     const router = useRouter();
@@ -20,7 +20,9 @@ export default function AllowDoMeeting({ children, meeting }: any)
         
         if(status === "authenticated" && session?.user)
         {
-            validDoMeeting({ ageRange: meeting.params[0], date: parseInt(meeting.params[1]), orientation: meeting.params[2], region: meeting.params[3] })
+            //console.log(idMeeting.params[0]);
+            
+            validDoMeeting(idMeeting.params[0])
             .then((res) =>
             {
                 if(!res.success)
