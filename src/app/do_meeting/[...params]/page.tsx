@@ -9,10 +9,11 @@ import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import Navbar from '@/app/components/navbar'
 import AllowDoMeeting from '@/app/components/AllowDoMeeting'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { orientations } from '@/app/api/variables/meetings'
 import { getCurrentUser } from '@/app/actions/users/get'
+import { startWebRTC } from '@/app/utils'
 
 // This is a mock function to simulate sending a message
 const sendMessage = (message: string) =>
@@ -22,14 +23,20 @@ const sendMessage = (message: string) =>
 
 export default function VideoConference({ params }: any)
 {
-  const [isMuted, setIsMuted] = React.useState(false)
-  const [isVideoOn, setIsVideoOn] = React.useState(true)
-  const [isChatOpen, setIsChatOpen] = React.useState(false)
-  const [message, setMessage] = React.useState('')
-  const [messages, setMessages] = React.useState<{ sender: string; text: string }[]>([
+  const [isMuted, setIsMuted] = useState(false)
+  const [isVideoOn, setIsVideoOn] = useState(true)
+  const [isChatOpen, setIsChatOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [messages, setMessages] = useState<{ sender: string; text: string }[]>([
     { sender: 'Sarah', text: 'Hi there! Excited for our video date!' },
     { sender: 'You', text: 'Hey Sarah! Me too, it\'s great to finally "meet" you!' },
   ])
+
+    //const [socket, setSocket] = useState<WebSocket | null>(null);
+    const [sessionId, setSessionId] = useState<string | null>(null);
+    const [peerId, setPeerId] = useState<string | null>(null);
+    const [role, setRole] = useState<string | null>(null);
+    const peerConnection = useRef<RTCPeerConnection>(null);
 
   const { data: session, status } = useSession();
   const socketRef = useRef<WebSocket | null>(null);
@@ -72,9 +79,55 @@ export default function VideoConference({ params }: any)
                     console.log("🎯 Match trouvé !");
                     console.log("Session ID :", data.sessionId);
                     console.log("Rôle :", data.role);
-                    console.log("Votre Peer ID :", data.peerId);
-            
-                    //startWebRTC(data.role);
+                    console.log("Votre Peer ID (Interlocuteur) :", data.peerId);
+
+                    if(data.role == "caller")
+                    {
+                        navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                        .then((res) =>
+                        {
+                            if (!peerConnection.current)
+                            {
+                                peerConnection.current = new RTCPeerConnection();
+                            }
+                            
+                            peerConnection.current.createOffer()
+                            .then((offer) => peerConnection.current.setLocalDescription(offer))
+                            .then(() =>
+                            {
+                                socket.send(JSON.stringify({ type: "offer", offer: peerConnection.current.localDescription, peerId: data.peerId }));
+                                //console.log("Envoi offre SDP");
+                            })
+                            .catch((err) =>
+                            {
+                                console.log(`Erreur création offre SDP : ${err}`);
+                            });
+
+                        })
+                        .catch((err) =>
+                        {
+                            console.log(`Erreur accès caméra et micro : ${err}`);
+                        });
+                    }
+
+                    else
+                    if(data.role == "callee")
+                    {
+                        socket.onmessage = (event) =>
+                        {
+                            console.log(event.data);
+
+                            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                            .then((res) =>
+                            {
+                                //
+                            })
+                            .catch((err) =>
+                            {
+                                console.log(`Erreur accès caméra et micro : ${err}`);
+                            });
+                        }
+                    }
                 }
             };
         }

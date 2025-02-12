@@ -20,87 +20,125 @@ wss.on('connection', (ws) =>
     {
         const data = JSON.parse(message);
 
-        const values = decodeId(data.session_id)[0].split(",");
-
-        //console.log(values);
-
-        if(!sessions.get(data.session_id))
+        if(data.type == "connect")
         {
-            const session =
+            const values = decodeId(data.session_id)[0].split(",");
+
+            //console.log(values);
+
+            if(!sessions.get(data.session_id))
             {
-                age: values[0],
-                orientation: values[2],
-                region: values[3],
-                date: parseInt(values[1]),
-                users: [ data.user ]
+                const session =
+                {
+                    age: values[0],
+                    orientation: values[2],
+                    region: values[3],
+                    date: parseInt(values[1]),
+                    users: [ {...data.user, clientSocket: ws} ]
+                }
+
+                sessions.set(data.session_id, session);
             }
 
-            sessions.set(data.session_id, session);
+            else
+            {
+                let session = sessions.get(data.session_id);
+
+                const alReadyConnected = session.users.some((user) =>
+                    {
+                        //console.log(user.id, data.user.id);
+                        
+                        return(
+                            user.id == data.user.id
+                        )
+                    }
+                );
+
+                //console.log(alReadyConnected);
+
+                if(!alReadyConnected)
+                {
+                    session.users.push({...data.user, clientSocket: ws});
+                    sessions.set(data.session_id, session);
+                }
+            }
+
+            //console.log(sessions);
+
+            sessions.forEach((session, sessionId) =>
+            {
+                if(session.users.length >= 2)
+                {
+                    //console.log(session.users);
+                    let interlocutors = [];
+
+                    if(session.orientation == "man_woman")
+                    {
+                        interlocutors = session.users.filter((interlocutor) =>
+                        {
+                            //console.log(interlocutor);
+                            
+                            return(interlocutor.gender != data.user.gender && !interlocutor.speak && data.user.already.indexOf(interlocutor.id) == -1);
+                        });
+                    }
+
+                    else
+                    {
+                        //
+                    }
+
+                    //console.log(interlocutors);
+
+                    if(interlocutors.length != 0)
+                    {
+                        const index = Math.floor(Math.random() * interlocutors.length);
+
+                        //console.log(interlocutors.length, index);
+
+                        //MATCHING
+                        data.user.speak = true;
+                        data.user.already.push(interlocutors[index].id);
+                        
+                        //ws.send(JSON.stringify({ type: "match", sessionId: data.session_id, peerId: interlocutors[index].id, role: !interlocutors[index].speak ? "caller" : "callee" }));
+
+                        interlocutors[index].speak = true;
+                        interlocutors[index].already.push(data.user.id);
+
+                        ///////////////////////////
+
+                        const peer1 = ws;
+                        const peer2 = interlocutors[index].clientSocket;
+
+                        peer1.sessionId = sessionId;
+                        peer2.sessionId = sessionId;
+
+                        peer1.peerId = data.user.id;
+                        peer2.peerId = interlocutors[index].id;
+
+                        peer1.send(JSON.stringify({ type: "match", sessionId, role: "caller", peerId: interlocutors[index].id }));
+                        peer2.send(JSON.stringify({ type: "match", sessionId, role: "callee", peerId: data.user.id }));
+                    }
+                }
+            });
         }
 
         else
+        if(data.type == "offer")
         {
-            let session = sessions.get(data.session_id);
+            //console.log(data);
 
-            const alReadyConnected = session.users.some((user) =>
-                {
-                    //console.log(user.id, data.user.id);
-                    
-                    return(
-                        user.id == data.user.id
-                    )
-                }
-            );
-
-            //console.log(alReadyConnected);
-
-            if(!alReadyConnected)
+            try
             {
-                session.users.push(data.user);
-                sessions.set(data.session_id, session);
+                const interlocutor = findPeerById(data.peerId);
+
+                interlocutor.send(JSON.stringify({ type: "offer", offer: data.offer }));
+            }
+
+            catch(err)
+            {
+                console.error("Error find interlocutor", err);
             }
         }
-
-        //console.log(sessions);
-
-        sessions.forEach((session, id) =>
-        {
-            if(session.users.length >= 2)
-            {
-                //console.log(session.users);
-                let interlocutors = [];
-
-                if(session.orientation == "man_woman")
-                {
-                    interlocutors = session.users.filter((interlocutor) =>
-                    {
-                        //console.log(interlocutor);
-                        
-                        return(interlocutor.gender != data.user.gender && !interlocutor.speak && data.user.already.indexOf(interlocutor.id) == -1);
-                    });
-                }
-
-                else
-                {
-                    //
-                }
-
-                //console.log(interlocutors);
-
-                const index = Math.floor(Math.random() * interlocutors.length);
-
-                //console.log(interlocutors.length, index);
-
-                //MATCHING
-                data.user.speak = true;
-                //interlocutors[index].speak = true;
-
-                data.user.already.push(interlocutors[index].id);
-                //interlocutors[index].already.push(data.user.id);
-
-                ws.send(JSON.stringify({ type: "match", sessionId: data.session_id, peerId: interlocutors[index].id, role: !interlocutors[index].speak ? "caller" : "callee" }));
-            }
-        });
     });
 
     /*if (waitingUser)
@@ -133,3 +171,18 @@ wss.on('connection', (ws) =>
 });
 
 console.log("Serveur WebSocket en écoute sur ws://localhost:8080");
+
+function findPeerById(peerId)
+{
+    //console.log(wss.clients);
+    
+    for (const client of wss.clients)
+    {
+        if (client.peerId === peerId)
+        {
+            return client;
+        }
+    }
+
+    return null;
+}

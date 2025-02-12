@@ -15,3 +15,8 @@ export function decodeId(id: string): string[]
     const decrypted = decipher.update(id, "hex", "utf8") + decipher.final("utf8");
     return decrypted.split("|");
 }
+
+export function startWebRTC(ws: WebSocket, role: string, peerConnection : RTCPeerConnection)
+{
+    console.log("Lancement web RTC");
+}
