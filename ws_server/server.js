@@ -25,7 +25,7 @@ wss.on('connection', (ws) =>
 
         if(data.type === "visio_on")
         {
-            console.log(`Test avec ${data.id}, ${data.name}`);
+            //console.log(`Test avec ${data.id}, ${data.name}`);
 
             if(admins.length >= 2)
             {
@@ -41,55 +41,35 @@ wss.on('connection', (ws) =>
 
             if(admins.length === 2)
             {
-                console.log("Open session");
+                //console.log("Open session");
                 
                 admins[0].ws.send(JSON.stringify({ type: "open_session", role: "caller" }));
                 //admins[1].ws.send(JSON.stringify({ type: "open_session", role: "callee" }));
             }
-
-            //console.log(dataToSend);
-
-            //dataToSend.type = "list_interlocutors";
-            
-            /*admins.forEach((admin, adminId) =>
-            {
-                const dataToSend = Object.fromEntries(
-                    Array.from(admins.entries())
-                        .filter(([id]) => id !== adminId)
-                        .map(([id, { name }]) => [id, { name }])
-                );
-
-                //console.log(dataToSend);
-            
-                admin.ws.send(JSON.stringify({
-                    type: "list_interlocutors",
-                    interlocutors: dataToSend
-                }));
-            });*/
         }
 
         else
         if(data.type === "offer")
         {
-            console.log("receive offer, send to callee");
+            //console.log("receive offer, send to callee");
             admins[1].ws.send(JSON.stringify({ type: "receive_offer", offer: data.offer }));
         }
 
         else
         if(data.type === "answer")
         {
-            console.log("receive answer, send to caller");
+            //console.log("receive answer, send to caller");
             admins[0].ws.send(JSON.stringify({ type: "receive_answer", answer: data.answer }));
         }
 
         else
         if(data.type === "ice_candidate")
         {
-            console.log("Receive ICE Candidates");
+            //console.log("Receive ICE Candidates");
             
             if(data.role === "caller")
             {
-                console.log("Send ICE candidates to callee");
+                //console.log("Send ICE candidates to callee");
                 
                 admins[1].ws.send(JSON.stringify({ type: "receive_ice_candidate", candidate: data.candidate }));
             }
@@ -97,7 +77,7 @@ wss.on('connection', (ws) =>
             else
             if(data.role === "callee")
             {
-                console.log("Send ICE candidates to caller");
+                //console.log("Send ICE candidates to caller");
                 
                 admins[0].ws.send(JSON.stringify({ type: "receive_ice_candidate", candidate: data.candidate }));
             }
@@ -106,41 +86,11 @@ wss.on('connection', (ws) =>
         else
         if(data.type == "visio_off")
         {
-            //admins.delete(data.id);
             admins.splice(admins.findIndex((item) => item.id == data.id), 1);
 
             console.log(`Disconnect of ${data.name} (${admins.length} users connected)`);
-
-            /*const dataToSend = Object.fromEntries(
-                Array.from(admins.entries()).map(([id, { name }]) => [id, { name }])
-            );
-            
-            admins.forEach((admin) =>
-            {
-                admin.ws.send(JSON.stringify(dataToSend));
-            });*/
         }
     });
-
-    /*if (waitingUser)
-    {
-        // Associer l'utilisateur en attente avec le nouvel utilisateur
-        const partner = waitingUser;
-        waitingUser = null;
-
-        const sessionId = Math.random().toString(36).substr(2, 9);
-
-        partner.send(JSON.stringify({ type: "match", sessionId }));
-        ws.send(JSON.stringify({ type: "match", sessionId }));
-
-        console.log(`Match trouvé ! Session ID: ${sessionId}`);
-    }
-    else
-    {
-        // Pas d'utilisateur en attente, on stocke celui-ci
-        waitingUser = ws;
-        ws.send(JSON.stringify({ type: "waiting", message: "En attente d'un autre utilisateur..." }));
-    }*/
 
     ws.on('close', () =>
     {
@@ -152,18 +102,3 @@ wss.on('connection', (ws) =>
 });
 
 console.log("Server WebSocket listening");
-
-function findPeerById(peerId)
-{
-    //console.log(wss.clients);
-    
-    for (const client of wss.clients)
-    {
-        if (client.peerId === peerId)
-        {
-            return client;
-        }
-    }
-
-    return null;
-}

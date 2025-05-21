@@ -9,20 +9,17 @@ import { MessageSquare, Mic, MicOff, Phone, Video, VideoOff } from 'lucide-react
 import { useSession } from 'next-auth/react'
 import { getCurrentUser } from '../actions/users/get'
 import AlertModal from '../components/alertModal'
-import { createPeerConnection } from '../utils/WebRTC'
+import { connect, createAnswer, createOffer, createPeerConnection, mediaDevicesToStream, quit } from '../utils/WebRTC'
 
-export default function TestMeeting({ meeting }: any)
+export default function TestMeeting()
 {
     const [isConnected, setIsConnected] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOn, setIsVideoOn] = useState(true);
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [username, setUsername] = useState("");
     const [message, setMessage] = useState("");
-    //const [conversation, setConversation] = useState([]);
     
     const socketRef = useRef<WebSocket | null>(null);
-    const localStreamRef = useRef(null);
+    const localVideoRef = useRef(null);
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
     const roleRef = useRef<string>("callee");
@@ -30,169 +27,38 @@ export default function TestMeeting({ meeting }: any)
 
     const { data: session, status } = useSession();
 
-    const connect = () =>
+    const mute = () =>
     {
-        if(session)
+        setIsMuted((prev) =>
         {
-            if(!socketRef.current)
-            {
-                socketRef.current = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
-            }
-
-            socketRef.current.onopen = () =>
-            {
-                console.log('Connecté au serveur WebSocket');
-
-                setIsConnected(true);
-
-                const message: string = JSON.stringify({ type: "visio_on", id: session.user.id, name: session.user.name });
-                setUsername(session.user.name);
+            const newMuted = !prev;
+    
+            const audioTrack = streamRef.current?.getAudioTracks?.()[0];
             
-                socketRef.current.send(message);
-            };
-        }
-    }
-
-    const quit = () =>
-    {
-        setIsConnected(false);
-            
-        const message: string = JSON.stringify({ type: "visio_off", id: session.user.id, name: username });
-    
-        if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
-        {
-            socketRef.current.send(message);
-            socketRef.current.close();
-        }
-    
-        socketRef.current = null;
-
-        if(streamRef.current)
-        {
-            streamRef.current.getTracks().forEach(function(track: MediaStreamTrack)
+            if (audioTrack)
             {
-                track.stop();
-            });
-
-            streamRef.current = null;
-        }
-    }
-
-    const mediaDevicesToStream = async () =>
-    {
-        /*navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream: MediaStream) =>
-        {
-            console.log("🎥 getUserMedia() gave us", stream);
-        
-            localStreamRef.current.srcObject = stream;
-    
-            stream.getTracks().forEach((track: MediaStreamTrack) =>
-            {
-                if(peerConnectionRef.current)
-                {
-                    peerConnectionRef.current.addTrack(track, stream);
-                    console.log("addTrack()");
-                }
-
-                else
-                {
-                    console.error("Error add tracks : No peer connection");
-                }
-            });
-    
-            streamRef.current = stream;
-        });*/
-
-        const stream: MediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-
-        console.log("🎥 getUserMedia() gave us", stream);
-        
-        localStreamRef.current.srcObject = stream;
-
-        stream.getTracks().forEach((track: MediaStreamTrack) =>
-        {
-            if(peerConnectionRef.current)
-            {
-                peerConnectionRef.current.addTrack(track, stream);
-                console.log("addTrack()");
+                audioTrack.enabled = !newMuted;
             }
-
-            else
-            {
-                console.error("Error add tracks : No peer connection");
-            }
+    
+            return newMuted;
         });
+    };
 
-        streamRef.current = stream;
-    }
-
-    const createOffer = async () =>
+    const videoOn = () =>
     {
-        if(peerConnectionRef.current)
+        setIsVideoOn((prev) =>
         {
-            peerConnectionRef.current.createOffer().then((offer) =>
-            {
-                console.log("Create offer ok");
+            const newOn = !prev;
     
-                peerConnectionRef.current.setLocalDescription(offer).then(() =>
-                {
-                    console.log("Send offer");
-                    
-                    socketRef.current.send(JSON.stringify({ type: "offer", offer }));
-                }).catch((error) =>
-                {
-                    alert(error);
-                });
-            }).catch((error) =>
+            const videoTrack = streamRef.current?.getVideoTracks?.()[0];
+            
+            if (videoTrack)
             {
-                alert(error);
-            });
-        }
-
-        else
-        {
-            console.error("Error create offer : No peer connection");
-        }
-    }
-
-    const createAnswer = (offer) =>
-    {
-        if(peerConnectionRef.current)
-        {
-            peerConnectionRef.current.setRemoteDescription(offer)
-            .then(async () =>
-            {
-                await mediaDevicesToStream();
-                
-                peerConnectionRef.current.createAnswer().then((answer) =>
-                {
-                    peerConnectionRef.current.setLocalDescription(answer)
-                    .then(() =>
-                    {
-                        console.log("Send answer");
-                        
-                        socketRef.current.send(JSON.stringify({ type: "answer", answer }));
-                    })
-                    .catch((error) =>
-                    {
-                        alert(error);
-                    });
-                })
-                .catch((error) =>
-                {
-                    alert(error);
-                });
-            })
-            .catch((error) =>
-            {
-                alert(error);
-            });
-        }
-
-        else
-        {
-            console.error("Error create answer : No peer connection");
-        }
+                videoTrack.enabled = newOn;
+            }
+    
+            return newOn;
+        });
     }
 
     if(socketRef.current)
@@ -203,33 +69,33 @@ export default function TestMeeting({ meeting }: any)
 
             if(resParsed.type === "open_session")
             {
-                console.log("Open session");
+                //console.log("Open session");
                 
                 if(resParsed.role === "caller")
                 {
                     roleRef.current = "caller";
 
                     createPeerConnection(peerConnectionRef, socketRef, roleRef, remoteVideoRef);
-                    await mediaDevicesToStream();
-                    await createOffer();
+                    await mediaDevicesToStream(localVideoRef, peerConnectionRef, streamRef);
+                    await createOffer(peerConnectionRef, socketRef);
                 }
             }
 
             else
             if(resParsed.type === "receive_offer")
             {
-                console.log("Receive offer");
+                //console.log("Receive offer");
 
                 createPeerConnection(peerConnectionRef, socketRef, roleRef, remoteVideoRef);
                     
                 const offer = resParsed.offer;
-                createAnswer(offer);
+                createAnswer(offer, peerConnectionRef, localVideoRef, streamRef, socketRef);
             }
 
             else
             if(resParsed.type === "receive_answer")
             {
-                console.log("Receive answer");
+                //console.log("Receive answer");
 
                 if(peerConnectionRef?.current &&
                     resParsed.answer &&
@@ -238,14 +104,14 @@ export default function TestMeeting({ meeting }: any)
                 {
                     peerConnectionRef.current.setRemoteDescription(resParsed.answer).catch(error => alert(error));
 
-                    console.log("Caller description answer");
+                    //console.log("Caller description answer");
                 }
             }
 
             else
             if (resParsed.type === "receive_ice_candidate")
             {
-                console.log("Received ICE candidate");
+                //console.log("Received ICE candidate");
             
                 if (peerConnectionRef.current && resParsed.candidate)
                 {
@@ -287,7 +153,7 @@ export default function TestMeeting({ meeting }: any)
                                         </div>
                                         <div className="absolute bottom-4 right-4 w-32 h-24 bg-gray-700 rounded-lg overflow-hidden">
                                             <video
-                                                ref={localStreamRef}
+                                                ref={localVideoRef}
                                                 loop
                                                 autoPlay
                                                 playsInline
@@ -300,29 +166,18 @@ export default function TestMeeting({ meeting }: any)
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            onClick={() => setIsMuted(!isMuted)}
+                                            onClick={mute}
                                             className={isMuted ? 'bg-pink-600 text-white' : ''}
-                                        >
-                                        {isMuted ? <MicOff /> : <Mic />}
+                                            >
+                                            {isMuted ? <MicOff /> : <Mic />}
                                         </Button>
                                         <Button
                                             variant="outline"
                                             size="icon"
-                                            onClick={() => setIsVideoOn(!isVideoOn)}
+                                            onClick={videoOn}
                                             className={!isVideoOn ? 'bg-pink-600 text-white' : ''}
-                                        >
-                                        {isVideoOn ? <Video /> : <VideoOff />}
-                                        </Button>
-                                        <Button variant="destructive" size="icon">
-                                        <Phone />
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            onClick={() => setIsChatOpen(!isChatOpen)}
-                                            className={isChatOpen ? 'bg-pink-600 text-white' : ''}
-                                        >
-                                        <MessageSquare />
+                                            >
+                                            {isVideoOn ? <Video /> : <VideoOff />}
                                         </Button>
                                     </div>
                                 </div>
@@ -331,7 +186,7 @@ export default function TestMeeting({ meeting }: any)
                             <div className="flex items-center justify-center">
                                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                     <div className="space-y-4">
-                                        <Button onClick={quit} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
+                                        <Button onClick={() => quit(setIsConnected, session, socketRef, streamRef)} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
                                     </div>
                                 </div>
                             </div>
@@ -344,7 +199,7 @@ export default function TestMeeting({ meeting }: any)
                         <div className="min-h-screen flex items-center justify-center bg-pink-50">
                             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                 <div className="space-y-4">
-                                    <Button onClick={connect} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
+                                    <Button onClick={() => connect(session, socketRef, setIsConnected)} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
                                 </div>
                             </div>
                         </div>
