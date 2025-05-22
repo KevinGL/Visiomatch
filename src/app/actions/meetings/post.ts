@@ -216,3 +216,37 @@ export const editMeeting = async (id: string, req) =>
     }
 }
 
+export const addLike = async (recept: string) =>
+{
+    //console.log(emit, recept);
+
+    try
+    {
+        const session = await getServerSession(authOptions);
+    
+        if(!session)
+        {
+            return { success: false, message: "Unauthenticated" };
+        }
+
+        const userRef = db.collection("users").doc(session.user.id);
+        const currentUser = await userRef.get();
+
+        if(!currentUser.exists)
+        {
+            return { success: false, message: "User not found" };
+        }
+
+        const likesRef = db.collection("likes");
+
+        likesRef.add({
+            emit: session.user.id,
+            recept
+        });
+    }
+
+    catch (error: any)
+    {
+        return { success: false, message: error.message };
+    }
+}

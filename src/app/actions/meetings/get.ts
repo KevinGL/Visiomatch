@@ -373,3 +373,72 @@ export const validDoMeeting = async (id) =>
 
     return { success: true, message: "OK" };
 }
+
+export const getMatchs = async () =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return [];
+    }
+    
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return [];
+    }
+
+    const likesRef = await db.collection("likes").get();
+
+    let matchs: any[] = [];
+    
+    /*likesRef.docs.map(async (like1, index1) =>
+    {
+        likesRef.docs.map(async (like2, index2) =>
+        {
+            if(index1 !== index2)
+            {
+                if(like1.data().emit === session.user.id && like2.data().recept === session.user.id)
+                {
+                    const userId: string = like1.data().recept;
+                    const matchRef = db.collection("users").doc(userId);
+
+                    const match = await matchRef.get();
+
+                    console.log(userId, match.data());
+                    
+                    matchs.push({ name: match.data().name, birthdate: match.data().birthdate, city: match.data().city, country: match.data().country, gender: match.data().gender });
+                }
+            }
+        });
+    });*/
+
+    for(let i = 0 ; i < likesRef.docs.length ; i++)
+    {
+        for(let j = 0 ; j < likesRef.docs.length ; j++)
+        {
+            if(i !== j)
+            {
+                const like1 = likesRef.docs[i];
+                const like2 = likesRef.docs[j];
+                
+                if(like1.data().emit === session.user.id && like2.data().recept === session.user.id)
+                {
+                    const userId: string = like1.data().recept;
+                    const matchRef = db.collection("users").doc(userId);
+
+                    const match = await matchRef.get();
+
+                    //console.log(userId, match.data());
+                    
+                    matchs.push({ name: match.data().name, birthdate: match.data().birthdate, city: match.data().city, country: match.data().country, gender: match.data().gender });
+                }
+            }
+        }
+    }
+
+    return matchs;
+}

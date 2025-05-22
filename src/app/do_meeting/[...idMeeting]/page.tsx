@@ -14,6 +14,7 @@ import { time } from 'console'
 import { useFormState } from 'react-dom'
 import { formatTime } from '@/app/utils'
 import MessageModal from '@/app/components/messageModal'
+import { addLike } from '@/app/actions/meetings/post'
 
 export default function VideoConference({ params }: { params: { idMeeting: string[] } })
 {
@@ -23,7 +24,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOn, setIsVideoOn] = useState(true);
     const [message, setMessage] = useState("");
-    //const [interlocutor, setInterlocutor] = useState<string>("");
+    const [interlocutor, setInterlocutor] = useState<string>("");
     const [timestamp, setTimestamp] = useState(0);
     const [now, setNow] = useState(Date.now());
     const [modalEnd, setModalEnd] = useState<boolean>(false);
@@ -49,9 +50,9 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     {
         if (timestamp !== 0 && now - timestamp >= dateDuration)
         {
-            /*setIsConnected(false);
-            setModalEnd(true);*/
-            quit();
+            setIsConnected(false);
+            setModalEnd(true);
+            quit();//quit(false);
         }
     }, [now]);
 
@@ -113,12 +114,29 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
         }
     }
 
+    /*const closeConnection = () =>
+    {
+        const message: string = JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting });
+    
+        if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
+        {
+            socketRef.current.send(message);
+            socketRef.current.close();
+
+            socketRef.current = null;
+        }
+    }*/
+
+    //const quit = (disconnect: boolean = true) =>
     const quit = () =>
     {
-        /////////////////////////
-        
         setIsConnected(false);
             
+        /*if(disconnect)
+        {
+            closeConnection();
+        }*/
+
         const message: string = JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting });
     
         if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
@@ -146,16 +164,20 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     {
         /*socketRef.current.send(JSON.stringify({ type: "speed_dating_like", value: true, userId: session.user.id, interlocutor }));
 
+        closeConnection();*/
+
+        addLike(interlocutor);
+
         setModalEnd(false);
-        quit();*/
     }
 
     const handleNoLike = () =>
     {
         /*socketRef.current.send(JSON.stringify({ type: "speed_dating_like", value: false, userId: session.user.id, interlocutor }));
 
+        closeConnection();*/
+
         setModalEnd(false);
-        quit();*/
     }
 
     const createPeerConnection = (interlocutor: string) =>
@@ -308,7 +330,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                 {
                     roleRef.current = "caller";
 
-                    //setInterlocutor(resParsed.interlocutor);
+                    setInterlocutor(resParsed.interlocutor);
                     setTimestamp(resParsed.timestamp);
                     //console.log(resParsed.timestamp);
 
@@ -329,7 +351,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
 
                 console.log(`Interlocutor of callee : ${resParsed.callerId}`);
 
-                //setInterlocutor(resParsed.callerId);
+                setInterlocutor(resParsed.callerId);
                 setTimestamp(resParsed.timestamp);
                 //console.log(resParsed.timestamp);
                     
@@ -438,7 +460,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                             <div className="flex items-center justify-center">
                                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                     <div className="space-y-4">
-                                        <Button onClick={quit} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
+                                        <Button onClick={() => quit()} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
                                     </div>
                                 </div>
                             </div>
@@ -451,7 +473,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                         <div className="min-h-screen flex items-center justify-center bg-pink-50">
                             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                 <div className="space-y-4">
-                                    <Button onClick={connect} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
+                                    <Button onClick={connect} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la session</Button>
                                 </div>
                             </div>
                         </div>

@@ -12,7 +12,7 @@ export default function Navbar() {
   const router = useRouter();
 
   const navItems = [
-    { name: 'Matches', href: '/matches', icon: Heart },
+    { name: 'Matches', callback: () => { router.push("/matchs") }, icon: Heart },
     { name: 'Se déconnecter', callback: () => signOut(), icon: DoorOpen },
     { name: 'Trouver une séance visio', callback: () => { router.push("/search") }, icon: Search },
   ]

@@ -12,7 +12,7 @@ const wss = new WebSocketServer({ port: process.env.PORT || 8080 });
 
 let users = [];
 let conversations = [];
-let likes = [];
+//let likes = [];
 let admins = [];
 //let conversationAdmins = [];
 
@@ -188,14 +188,19 @@ wss.on('connection', (ws) =>
             
             likes.push(like);
 
-            console.log(likes);
+            //console.log(likes);
 
             const indexLike = likes.findIndex((l) => (l.emit === like.recept || l.recept === like.emit) && like.value && l.value);
 
+            let match = false;
+
             if(indexLike > -1)
             {
-                console.log("Match");
+                //console.log("Match");
+                match = true;
             }
+
+            ws.send(JSON.stringify({ type: "speed_dating_match", match: match ? data.interlocutor : "" }));
         }*/
 
         else
