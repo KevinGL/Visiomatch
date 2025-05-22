@@ -215,3 +215,4 @@ export const editMeeting = async (id: string, req) =>
         return { success: false, message: error.message };
     }
 }
+

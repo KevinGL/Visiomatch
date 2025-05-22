@@ -11,7 +11,8 @@ function decodeId(id)
 const wss = new WebSocketServer({ port: process.env.PORT || 8080 });
 
 let users = [];
-let pairs = [];
+let conversations = [];
+let likes = [];
 let admins = [];
 //let conversationAdmins = [];
 
@@ -119,18 +120,18 @@ wss.on('connection', (ws) =>
             
             if(indexOtherUser > -1)
             {
-                const pair = [user.id, users[indexOtherUser].id];
+                const conversation = { id1: user.id, id2: users[indexOtherUser].id, timestamp: Date.now() };
                 
                 if((data.orientation === "man_woman" && users[indexOtherUser].gender !== user.gender ||
                    data.orientation !== "man_woman" && users[indexOtherUser].gender === user.gender) &&
-                   pairs.findIndex((p) => p[0] === pair[0] && p[1] === pair[1] || p[0] === pair[1] && p[1] === pair[0]) === -1)
+                   conversations.findIndex((c) => conversation.id1 === c.id1 && conversation.id2 === c.id2 || conversation.id1 === c.id2 && conversation.id2 === c.id1) === -1)
                 {
-                    ws.send(JSON.stringify({ type: "speed_dating_open_session", interlocutor: users[indexOtherUser].id, role: "caller" }));
+                    ws.send(JSON.stringify({ type: "speed_dating_open_session", interlocutor: users[indexOtherUser].id, role: "caller", timestamp: conversation.timestamp }));
                     //users[indexOtherUser].ws.send(JSON.stringify({ type: "speed_dating_open_session", index: users.length - 1, role: "callee" }));
                     
-                    pairs.push(pair);
+                    conversations.push(conversation);
 
-                    console.log(pair);
+                    console.log(conversation);
                 }
             }
         }
@@ -144,7 +145,9 @@ wss.on('connection', (ws) =>
 
             if(indexInterlocutor > -1)
             {
-                users[indexInterlocutor].ws.send(JSON.stringify({ type: "speed_dating_receive_offer", offer: data.offer, callerId: data.userId }));
+                const indexConversation = conversations.findIndex((c) => c.id1 === data.userId && c.id2 === data.interlocutor || c.id2 === data.userId && c.id1 === data.interlocutor);
+                
+                users[indexInterlocutor].ws.send(JSON.stringify({ type: "speed_dating_receive_offer", offer: data.offer, callerId: data.userId, timestamp: conversations[indexConversation].timestamp }));
             }
         }
 
@@ -164,9 +167,11 @@ wss.on('connection', (ws) =>
         else
         if(data.type === "speed_dating_ice_candidates")
         {
-            //console.log("Receive ICE Candidates");
+            console.log("Receive ICE Candidates");
 
             const indexInterlocutor = users.findIndex((u) => u.id === data.interlocutor);
+
+            //console.log(data.interlocutor, indexInterlocutor);
             
             if(indexInterlocutor > -1)
             {
@@ -175,6 +180,23 @@ wss.on('connection', (ws) =>
                 users[indexInterlocutor].ws.send(JSON.stringify({ type: "speed_dating_receive_ice_candidate", candidate: data.candidate }));
             }
         }
+
+        /*else
+        if(data.type === "speed_dating_like")
+        {
+            const like = { emit: data.userId, recept: data.interlocutor, value: data.value, ws };
+            
+            likes.push(like);
+
+            console.log(likes);
+
+            const indexLike = likes.findIndex((l) => (l.emit === like.recept || l.recept === like.emit) && like.value && l.value);
+
+            if(indexLike > -1)
+            {
+                console.log("Match");
+            }
+        }*/
 
         else
         if(data.type === "speed_dating_off")

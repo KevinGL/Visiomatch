@@ -9,7 +9,11 @@ import { useSession } from 'next-auth/react'
 import { getCurrentUser } from '../../actions/users/get'
 import AlertModal from '../../components/alertModal'
 import AllowDoMeeting from '@/app/components/AllowDoMeeting'
-import { orientations } from '@/app/api/variables/meetings'
+import { dateDuration, orientations } from '@/app/api/variables/meetings'
+import { time } from 'console'
+import { useFormState } from 'react-dom'
+import { formatTime } from '@/app/utils'
+import MessageModal from '@/app/components/messageModal'
 
 export default function VideoConference({ params }: { params: { idMeeting: string[] } })
 {
@@ -19,7 +23,10 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOn, setIsVideoOn] = useState(true);
     const [message, setMessage] = useState("");
-    const [interlocutor, setInterlocutor] = useState("");
+    //const [interlocutor, setInterlocutor] = useState<string>("");
+    const [timestamp, setTimestamp] = useState(0);
+    const [now, setNow] = useState(Date.now());
+    const [modalEnd, setModalEnd] = useState<boolean>(false);
     
     const socketRef = useRef<WebSocket | null>(null);
     const localVideoRef = useRef(null);
@@ -29,6 +36,24 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     const streamRef = useRef<MediaStream>(null);
 
     const { data: session, status } = useSession();
+
+    useEffect(() =>
+    {
+        setInterval(() =>
+        {
+            setNow(Date.now());
+        }, 1000);
+    }, []);
+
+    useEffect(() =>
+    {
+        if (timestamp !== 0 && now - timestamp >= dateDuration)
+        {
+            /*setIsConnected(false);
+            setModalEnd(true);*/
+            quit();
+        }
+    }, [now]);
 
     const mute = () =>
     {
@@ -64,7 +89,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
         });
     }
 
-    const connect = (session, socketRef, setIsConnected) =>
+    const connect = () =>
     {
         if(session)
         {
@@ -75,19 +100,23 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     
             socketRef.current.onopen = () =>
             {
-                //console.log('Connecté au serveur WebSocket');
+                console.log('Connecté au serveur WebSocket');
     
                 setIsConnected(true);
+
+                //console.log(session.user);
     
-                const message: string = JSON.stringify({ type: "speed_dating_on", userId: session.user.id, name: session.user.name, orientation: session.user.orientation, gender: session.user.gender, idMeeting });
+                const message: string = JSON.stringify({ type: "speed_dating_on", userId: session.user.id, name: session.user.name, orientation: (session.user as any).orientation, gender: (session.user as any).gender, idMeeting });
             
                 socketRef.current.send(message);
             };
         }
     }
 
-    const quit = (setIsConnected, session, socketRef, streamRef) =>
+    const quit = () =>
     {
+        /////////////////////////
+        
         setIsConnected(false);
             
         const message: string = JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting });
@@ -96,9 +125,9 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
         {
             socketRef.current.send(message);
             socketRef.current.close();
+
+            socketRef.current = null;
         }
-    
-        socketRef.current = null;
     
         if(streamRef.current)
         {
@@ -109,9 +138,27 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     
             streamRef.current = null;
         }
+
+        setTimestamp(0);
     }
 
-    const createPeerConnection = () =>
+    const handleLike = () =>
+    {
+        /*socketRef.current.send(JSON.stringify({ type: "speed_dating_like", value: true, userId: session.user.id, interlocutor }));
+
+        setModalEnd(false);
+        quit();*/
+    }
+
+    const handleNoLike = () =>
+    {
+        /*socketRef.current.send(JSON.stringify({ type: "speed_dating_like", value: false, userId: session.user.id, interlocutor }));
+
+        setModalEnd(false);
+        quit();*/
+    }
+
+    const createPeerConnection = (interlocutor: string) =>
     {
         peerConnectionRef.current = new RTCPeerConnection({
             iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
@@ -121,7 +168,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     
         peerConnectionRef.current.onicecandidate = (event) =>
         {
-            console.log("onicecandidate fired", event.candidate);
+            console.log("onicecandidate fired", event.candidate, `"${interlocutor}"`);
     
             if (event.candidate)
             {
@@ -140,8 +187,8 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             if (remoteVideoRef.current)
             {
                 remoteVideoRef.current.srcObject = event.streams[0];
-                //console.log("✅ Assigned remote stream", remoteVideoRef.current);
-                //console.log("Tracks:", event.streams[0]);
+                /*console.log("✅ Assigned remote stream", remoteVideoRef.current);
+                console.log("Tracks:", event.streams[0]);*/
             }
         };
     }
@@ -150,7 +197,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     {
         const stream: MediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
     
-        //console.log("🎥 getUserMedia() gave us", stream);
+        console.log("🎥 getUserMedia() gave us", stream);
         
         localVideoRef.current.srcObject = stream;
     
@@ -164,26 +211,26 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     
             else
             {
-                //console.error("Error add tracks : No peer connection");
+                console.error("Error add tracks : No peer connection");
             }
         });
     
         streamRef.current = stream;
     }
     
-    const createOffer = async () =>
+    const createOffer = async (interlocutorId: string) =>
     {
         if(peerConnectionRef.current)
         {
-            peerConnectionRef.current.createOffer().then((offer) =>
+            /*peerConnectionRef.current.createOffer().then((offer) =>
             {
-                //console.log("Create offer ok");
+                console.log("Create offer ok");
     
                 peerConnectionRef.current.setLocalDescription(offer).then(() =>
                 {
-                    //console.log("Send offer");
+                    console.log("Send offer");
                     
-                    socketRef.current.send(JSON.stringify({ type: "speed_dating_offer", interlocutor, offer, userId : session.user.id }));
+                    socketRef.current.send(JSON.stringify({ type: "speed_dating_offer", interlocutor: interlocutorId, offer, userId : session.user.id }));
                 }).catch((error) =>
                 {
                     alert(error);
@@ -191,7 +238,13 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             }).catch((error) =>
             {
                 alert(error);
-            });
+            });*/
+
+            const offer = await peerConnectionRef.current.createOffer();
+            console.log("Create offer ok");
+            await peerConnectionRef.current.setLocalDescription(offer);
+            console.log("Send offer");
+            socketRef.current.send(JSON.stringify({ type: "speed_dating_offer", interlocutor: interlocutorId, offer, userId : session.user.id }));
         }
     
         else
@@ -200,7 +253,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
         }
     }
     
-    const createAnswer = (offer, callerId) =>
+    const createAnswer = async (offer, callerId) =>
     {
         if(peerConnectionRef.current)
         {
@@ -209,12 +262,12 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             {
                 await mediaDevicesToStream();
                 
-                peerConnectionRef.current.createAnswer().then((answer) =>
+                /*peerConnectionRef.current.createAnswer().then((answer) =>
                 {
                     peerConnectionRef.current.setLocalDescription(answer)
                     .then(() =>
                     {
-                        //console.log("Send answer");
+                        console.log("Send answer");
                         
                         socketRef.current.send(JSON.stringify({ type: "speed_dating_answer", answer, callerId }));
                     })
@@ -222,11 +275,12 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                     {
                         alert(error);
                     });
-                })
-                .catch((error) =>
-                {
-                    alert(error);
-                });
+                })*/
+
+                const answer = await peerConnectionRef.current.createAnswer();
+                await peerConnectionRef.current.setLocalDescription(answer);
+                console.log("Send answer");
+                socketRef.current.send(JSON.stringify({ type: "speed_dating_answer", answer, callerId }));
             })
             .catch((error) =>
             {
@@ -254,11 +308,15 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                 {
                     roleRef.current = "caller";
 
-                    setInterlocutor(resParsed.interlocutor);
+                    //setInterlocutor(resParsed.interlocutor);
+                    setTimestamp(resParsed.timestamp);
+                    //console.log(resParsed.timestamp);
 
-                    createPeerConnection();
+                    console.log(`Interlocutor of caller : ${resParsed.interlocutor}`);
+
+                    createPeerConnection(resParsed.interlocutor);
                     await mediaDevicesToStream();
-                    await createOffer();
+                    await createOffer(resParsed.interlocutor);
                 }
             }
 
@@ -267,12 +325,16 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             {
                 console.log("Receive offer");
 
-                createPeerConnection();
+                createPeerConnection(resParsed.callerId);
 
-                setInterlocutor(resParsed.callerId);
+                console.log(`Interlocutor of callee : ${resParsed.callerId}`);
+
+                //setInterlocutor(resParsed.callerId);
+                setTimestamp(resParsed.timestamp);
+                //console.log(resParsed.timestamp);
                     
                 const offer = resParsed.offer;
-                createAnswer(offer, resParsed.callerId);
+                await createAnswer(offer, resParsed.callerId);
             }
 
             else
@@ -287,7 +349,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                 {
                     peerConnectionRef.current.setRemoteDescription(resParsed.answer).catch(error => alert(error));
 
-                    //console.log("Caller description answer");
+                    console.log("Caller description answer");
                 }
             }
 
@@ -334,6 +396,13 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
+                                        {
+                                            timestamp !== 0 &&
+
+                                            <div className="absolute top-4 left-4 text-white">
+                                                { formatTime((dateDuration - (now - timestamp)) / 1000) }
+                                            </div>
+                                        }
                                         <div className="absolute bottom-4 right-4 w-32 h-24 bg-gray-700 rounded-lg overflow-hidden">
                                             <video
                                                 ref={localVideoRef}
@@ -369,7 +438,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                             <div className="flex items-center justify-center">
                                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                     <div className="space-y-4">
-                                        <Button onClick={() => quit(setIsConnected, session, socketRef, streamRef)} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
+                                        <Button onClick={quit} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
                                     </div>
                                 </div>
                             </div>
@@ -382,7 +451,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                         <div className="min-h-screen flex items-center justify-center bg-pink-50">
                             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                 <div className="space-y-4">
-                                    <Button onClick={() => connect(session, socketRef, setIsConnected)} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
+                                    <Button onClick={connect} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
                                 </div>
                             </div>
                         </div>
@@ -393,6 +462,13 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
 
                         <AlertModal message={message} onClose={() => setMessage("")} />
                     }
+
+                    {
+                        modalEnd &&
+
+                        <MessageModal setLike={handleLike} setNoLike={handleNoLike} message="Le temps est écoulé !" />
+                    }
+
                 </div>
             </div>
         </AllowDoMeeting>
