@@ -28,6 +28,8 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     const [timestamp, setTimestamp] = useState(0);
     const [now, setNow] = useState(Date.now());
     const [modalEnd, setModalEnd] = useState<boolean>(false);
+    const [modalGhost, setModalGhost] = useState<boolean>(false);
+    const [nameGhost, setNameGhost] = useState<string>("");
     
     const socketRef = useRef<WebSocket | null>(null);
     const localVideoRef = useRef(null);
@@ -137,7 +139,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             closeConnection();
         }*/
 
-        const message: string = JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting });
+        const message: string = JSON.stringify({ type: "speed_dating_off", userId: session.user.id, name: session.user.name, idMeeting });
     
         if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
         {
@@ -393,6 +395,14 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                     });
                 }
             }
+
+            else
+            if (resParsed.type === "speed_dating_ghost")
+            {
+                quit();
+                setModalGhost(true);
+                setNameGhost(resParsed.name);
+            }
         }
     }
     
@@ -489,6 +499,12 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                         modalEnd &&
 
                         <MessageModal setLike={handleLike} setNoLike={handleNoLike} message="Le temps est écoulé !" />
+                    }
+
+                    {
+                        modalGhost &&
+
+                        <AlertModal message={`${nameGhost} s'est déconnecté(e)`} onClose={() => {setModalGhost(false); setNameGhost("")}} />
                     }
 
                 </div>

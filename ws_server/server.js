@@ -1,20 +1,13 @@
 import { WebSocketServer } from 'ws';
 import crypto from "crypto";
 
-function decodeId(id)
-{
-    const decipher = crypto.createDecipher("aes-256-ctr", "#Ge*wLajd/aln5)I(rQbf6hSa_B(wr:4");
-    const decrypted = decipher.update(id, "hex", "utf8") + decipher.final("utf8");
-    return decrypted.split("|");
-}
-
 const wss = new WebSocketServer({ port: process.env.PORT || 8080 });
 
 let users = [];
 let conversations = [];
-//let likes = [];
 let admins = [];
-//let conversationAdmins = [];
+
+const dateDuration = 3 * 60 * 1000;
 
 wss.on('connection', (ws) =>
 {
@@ -209,6 +202,31 @@ wss.on('connection', (ws) =>
             users.splice(users.findIndex((u) => u.id === data.userId), 1);
 
             console.log(`Disconnect of ${data.name} (${users.length} connected)`);
+
+            const indexConversNotOver = conversations.findIndex((c) => (c.id1 === data.userId || c.id2 === data.userId) && Date.now() - c.timestamp < dateDuration);
+
+            //console.log(conversations, data.userId);
+
+            const conversNotOver = conversations[indexConversNotOver];
+            let ghosted;
+
+            if(conversNotOver.id1 === data.userId)
+            {
+                ghosted = conversNotOver.id2;
+            }
+
+            else
+            if(conversNotOver.id2 === data.userId)
+            {
+                ghosted = conversNotOver.id1;
+            }
+
+            const indexGhosted = users.findIndex((u) => u.id === ghosted);
+
+            if(indexGhosted > -1)
+            {
+                users[indexGhosted].ws.send(JSON.stringify({ type: "speed_dating_ghost", name: data.name }));
+            }
         }
     });
 
