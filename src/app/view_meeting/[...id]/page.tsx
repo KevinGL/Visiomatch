@@ -45,7 +45,7 @@ export default function aa({ params }: any)
                     date: date,
                     time: `${date.getHours().toString().padStart(2, "0")}:${date.getMinutes().toString().padStart(2, "0")}`,
                     name: orientations.get(data.orientation),
-                    location: regions.get(data.region),
+                    location: data.region,//regions.get(data.region),
                     participants: data.participants
                 };
 

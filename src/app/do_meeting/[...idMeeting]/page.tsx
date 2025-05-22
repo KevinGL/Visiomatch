@@ -2,20 +2,24 @@
 
 import * as React from 'react'
 import {useState, useEffect, useRef} from 'react'
-import AllowTestMeeting from '../components/AllowTestMeeting'
-import Navbar from '../components/navbar'
+import Navbar from '../../components/navbar'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Mic, MicOff, Phone, Video, VideoOff } from 'lucide-react'
 import { useSession } from 'next-auth/react'
-import { getCurrentUser } from '../actions/users/get'
-import AlertModal from '../components/alertModal'
+import { getCurrentUser } from '../../actions/users/get'
+import AlertModal from '../../components/alertModal'
+import AllowDoMeeting from '@/app/components/AllowDoMeeting'
+import { orientations } from '@/app/api/variables/meetings'
 
-export default function TestMeeting()
+export default function VideoConference({ params }: { params: { idMeeting: string[] } })
 {
+    const idMeeting = params.idMeeting?.[0];
+    
     const [isConnected, setIsConnected] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
     const [isVideoOn, setIsVideoOn] = useState(true);
     const [message, setMessage] = useState("");
+    const [interlocutor, setInterlocutor] = useState("");
     
     const socketRef = useRef<WebSocket | null>(null);
     const localVideoRef = useRef(null);
@@ -60,42 +64,7 @@ export default function TestMeeting()
         });
     }
 
-    const createPeerConnection = () =>
-    {
-        peerConnectionRef.current = new RTCPeerConnection({
-            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-        });
-    
-        //console.log("RTCPeerConnection created");
-    
-        peerConnectionRef.current.onicecandidate = (event) =>
-        {
-            //console.log("onicecandidate fired", event.candidate);
-    
-            if (event.candidate)
-            {
-                socketRef.current?.send(JSON.stringify({
-                    type: "ice_candidate",
-                    candidate: event.candidate,
-                    role: roleRef.current
-                }));
-            }
-        };
-    
-        peerConnectionRef.current.ontrack = (event) =>
-        {
-            //console.log("🎥 Track received on", roleRef.current, event.streams);
-            
-            if (remoteVideoRef.current)
-            {
-                remoteVideoRef.current.srcObject = event.streams[0];
-                //console.log("✅ Assigned remote stream", remoteVideoRef.current);
-                //console.log("Tracks:", event.streams[0]);
-            }
-        };
-    }
-    
-    const connect = () =>
+    const connect = (session, socketRef, setIsConnected) =>
     {
         if(session)
         {
@@ -110,18 +79,18 @@ export default function TestMeeting()
     
                 setIsConnected(true);
     
-                const message: string = JSON.stringify({ type: "visio_on", id: session.user.id, name: session.user.name });
+                const message: string = JSON.stringify({ type: "speed_dating_on", userId: session.user.id, name: session.user.name, orientation: session.user.orientation, gender: session.user.gender, idMeeting });
             
                 socketRef.current.send(message);
             };
         }
     }
-    
-    const quit = () =>
+
+    const quit = (setIsConnected, session, socketRef, streamRef) =>
     {
         setIsConnected(false);
             
-        const message: string = JSON.stringify({ type: "visio_off", id: session.user.id, name: session.user.name });
+        const message: string = JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting });
     
         if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
         {
@@ -141,7 +110,42 @@ export default function TestMeeting()
             streamRef.current = null;
         }
     }
+
+    const createPeerConnection = () =>
+    {
+        peerConnectionRef.current = new RTCPeerConnection({
+            iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+        });
     
+        console.log("RTCPeerConnection created");
+    
+        peerConnectionRef.current.onicecandidate = (event) =>
+        {
+            console.log("onicecandidate fired", event.candidate);
+    
+            if (event.candidate)
+            {
+                socketRef.current?.send(JSON.stringify({
+                    type: "speed_dating_ice_candidates",
+                    candidate: event.candidate,
+                    interlocutor
+                }));
+            }
+        };
+    
+        peerConnectionRef.current.ontrack = (event) =>
+        {
+            console.log("🎥 Track received on", roleRef.current, event.streams);
+            
+            if (remoteVideoRef.current)
+            {
+                remoteVideoRef.current.srcObject = event.streams[0];
+                //console.log("✅ Assigned remote stream", remoteVideoRef.current);
+                //console.log("Tracks:", event.streams[0]);
+            }
+        };
+    }
+
     const mediaDevicesToStream = async () =>
     {
         const stream: MediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -179,7 +183,7 @@ export default function TestMeeting()
                 {
                     //console.log("Send offer");
                     
-                    socketRef.current.send(JSON.stringify({ type: "offer", offer }));
+                    socketRef.current.send(JSON.stringify({ type: "speed_dating_offer", interlocutor, offer, userId : session.user.id }));
                 }).catch((error) =>
                 {
                     alert(error);
@@ -196,7 +200,7 @@ export default function TestMeeting()
         }
     }
     
-    const createAnswer = (offer) =>
+    const createAnswer = (offer, callerId) =>
     {
         if(peerConnectionRef.current)
         {
@@ -212,7 +216,7 @@ export default function TestMeeting()
                     {
                         //console.log("Send answer");
                         
-                        socketRef.current.send(JSON.stringify({ type: "answer", answer }));
+                        socketRef.current.send(JSON.stringify({ type: "speed_dating_answer", answer, callerId }));
                     })
                     .catch((error) =>
                     {
@@ -242,13 +246,15 @@ export default function TestMeeting()
         {
             const resParsed = JSON.parse(res.data);
 
-            if(resParsed.type === "open_session")
+            if(resParsed.type === "speed_dating_open_session")
             {
-                //console.log("Open session");
+                console.log("Open session");
                 
                 if(resParsed.role === "caller")
                 {
                     roleRef.current = "caller";
+
+                    setInterlocutor(resParsed.interlocutor);
 
                     createPeerConnection();
                     await mediaDevicesToStream();
@@ -257,20 +263,22 @@ export default function TestMeeting()
             }
 
             else
-            if(resParsed.type === "receive_offer")
+            if(resParsed.type === "speed_dating_receive_offer")
             {
-                //console.log("Receive offer");
+                console.log("Receive offer");
 
                 createPeerConnection();
+
+                setInterlocutor(resParsed.callerId);
                     
                 const offer = resParsed.offer;
-                createAnswer(offer);
+                createAnswer(offer, resParsed.callerId);
             }
 
             else
-            if(resParsed.type === "receive_answer")
+            if(resParsed.type === "speed_dating_receive_answer")
             {
-                //console.log("Receive answer");
+                console.log("Receive answer");
 
                 if(peerConnectionRef?.current &&
                     resParsed.answer &&
@@ -284,9 +292,9 @@ export default function TestMeeting()
             }
 
             else
-            if (resParsed.type === "receive_ice_candidate")
+            if (resParsed.type === "speed_dating_receive_ice_candidate")
             {
-                //console.log("Received ICE candidate");
+                console.log("Received ICE candidate");
             
                 if (peerConnectionRef.current && resParsed.candidate)
                 {
@@ -305,11 +313,11 @@ export default function TestMeeting()
     }
     
     return (
-        <AllowTestMeeting>
+        <AllowDoMeeting idMeeting={idMeeting}>
             <div className="min-h-screen bg-pink-50">
                 <Navbar />
                 <div className="container mx-auto p-4 h-screen flex flex-col">
-                    <h1 className="text-3xl font-bold text-pink-600 mb-4">Test Visio</h1>
+                    <h1 className="text-3xl font-bold text-pink-600 mb-4">Video Date</h1>
                     {
                         isConnected &&
 
@@ -361,7 +369,7 @@ export default function TestMeeting()
                             <div className="flex items-center justify-center">
                                 <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                     <div className="space-y-4">
-                                        <Button onClick={() => quit()} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
+                                        <Button onClick={() => quit(setIsConnected, session, socketRef, streamRef)} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Quitter la conversation</Button>
                                     </div>
                                 </div>
                             </div>
@@ -374,7 +382,7 @@ export default function TestMeeting()
                         <div className="min-h-screen flex items-center justify-center bg-pink-50">
                             <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md">
                                 <div className="space-y-4">
-                                    <Button onClick={() => connect()} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
+                                    <Button onClick={() => connect(session, socketRef, setIsConnected)} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Rejoindre la conversation</Button>
                                 </div>
                             </div>
                         </div>
@@ -387,6 +395,6 @@ export default function TestMeeting()
                     }
                 </div>
             </div>
-        </AllowTestMeeting>
+        </AllowDoMeeting>
     )
 }

@@ -10,7 +10,8 @@ function decodeId(id)
 
 const wss = new WebSocketServer({ port: process.env.PORT || 8080 });
 
-let sessions = new Map();
+let users = [];
+let pairs = [];
 let admins = [];
 //let conversationAdmins = [];
 
@@ -84,11 +85,103 @@ wss.on('connection', (ws) =>
         }
 
         else
-        if(data.type == "visio_off")
+        if(data.type === "visio_off")
         {
             admins.splice(admins.findIndex((item) => item.id == data.id), 1);
 
             console.log(`Disconnect of ${data.name} (${admins.length} users connected)`);
+        }
+
+        //////////////////////////////
+        //////////////////////////////
+        //////////////////////////////
+        //////////////////////////////
+
+        else
+        if(data.type === "speed_dating_on")
+        {
+            //console.log(data.orientation);
+
+            const user = {
+                id: data.userId,
+                idMeeting: data.idMeeting,
+                name: data.name,
+                orientation: data.orientation,
+                gender: data.gender,
+                ws
+            };
+
+            users.push(user);
+
+            console.log(`Connection of ${data.name} (${users.length} connected)`);
+
+            const indexOtherUser = users.findIndex((u) => u.idMeeting === user.idMeeting && u.id !== user.id);
+            
+            if(indexOtherUser > -1)
+            {
+                const pair = [user.id, users[indexOtherUser].id];
+                
+                if((data.orientation === "man_woman" && users[indexOtherUser].gender !== user.gender ||
+                   data.orientation !== "man_woman" && users[indexOtherUser].gender === user.gender) &&
+                   pairs.findIndex((p) => p[0] === pair[0] && p[1] === pair[1] || p[0] === pair[1] && p[1] === pair[0]) === -1)
+                {
+                    ws.send(JSON.stringify({ type: "speed_dating_open_session", interlocutor: users[indexOtherUser].id, role: "caller" }));
+                    //users[indexOtherUser].ws.send(JSON.stringify({ type: "speed_dating_open_session", index: users.length - 1, role: "callee" }));
+                    
+                    pairs.push(pair);
+
+                    console.log(pair);
+                }
+            }
+        }
+
+        else
+        if(data.type === "speed_dating_offer")
+        {
+            //console.log("receive offer, send to callee");
+
+            const indexInterlocutor = users.findIndex((u) => u.id === data.interlocutor);
+
+            if(indexInterlocutor > -1)
+            {
+                users[indexInterlocutor].ws.send(JSON.stringify({ type: "speed_dating_receive_offer", offer: data.offer, callerId: data.userId }));
+            }
+        }
+
+        else
+        if(data.type === "speed_dating_answer")
+        {
+            //console.log("receive answer, send to caller");
+
+            const indexCaller = users.findIndex((u) => u.id === data.callerId);
+
+            if(indexCaller > -1)
+            {
+                users[indexCaller].ws.send(JSON.stringify({ type: "speed_dating_receive_answer", answer: data.answer }));
+            }
+        }
+
+        else
+        if(data.type === "speed_dating_ice_candidates")
+        {
+            //console.log("Receive ICE Candidates");
+
+            const indexInterlocutor = users.findIndex((u) => u.id === data.interlocutor);
+            
+            if(indexInterlocutor > -1)
+            {
+                //console.log("Send ICE candidates to callee");
+                
+                users[indexInterlocutor].ws.send(JSON.stringify({ type: "speed_dating_receive_ice_candidate", candidate: data.candidate }));
+            }
+        }
+
+        else
+        if(data.type === "speed_dating_off")
+        {
+            users.splice(users.findIndex((u) => u.id === data.userId), 1);
+
+            console.log(`Disconnect of ${data.name} (${users.length} connected)`);
         }
     });
 

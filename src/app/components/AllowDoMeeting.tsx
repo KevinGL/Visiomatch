@@ -22,7 +22,7 @@ export default function AllowDoMeeting({ children, idMeeting }: any)
         {
             //console.log(idMeeting.params[0]);
             
-            validDoMeeting(idMeeting.params[0])
+            validDoMeeting(idMeeting)
             .then((res) =>
             {
                 if(!res.success)

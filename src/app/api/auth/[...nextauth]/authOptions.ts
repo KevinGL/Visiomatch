@@ -3,6 +3,7 @@ import { db } from "@/firebase/config";
 import * as admin from 'firebase-admin';
 import bcrypt from 'bcrypt';
 import { JWT } from 'next-auth/jwt';
+import { getOrientation } from '@/app/utils/utils';
 
 export const authOptions =
 {
@@ -61,8 +62,10 @@ export const authOptions =
                   admin: false,
                   participations: []
                 });
+
+                const orientation = getOrientation(credentials?.gender, credentials?.search);
   
-                return { id: newUser.id, email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate, name: credentials?.name };
+                return { id: newUser.id, email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate, name: credentials?.name, orientation };
           }
   
           else
@@ -74,8 +77,10 @@ export const authOptions =
                   return null;
               }
           }
+
+          const orientation = getOrientation(user.gender, user.search);
   
-          return { id: user.id, email: user.email, gender: user.gender, search: user.search, birthdate: user.birthdate, name: user.name };
+          return { id: user.id, email: user.email, gender: user.gender, search: user.search, birthdate: user.birthdate, name: user.name, orientation };
         },
       }),
     ],
@@ -88,6 +93,8 @@ export const authOptions =
         {
           token.id = user.id;  // Ajouter l'id de l'utilisateur dans le JWT
           token.name = user.name;
+          token.orientation = user.orientation;
+          token.gender = user.gender;
         }
         return token;
       },
@@ -99,6 +106,8 @@ export const authOptions =
         {
           session.user.id = token.id;  // Ajouter l'id dans les données de session
           session.user.name = token.name;
+          session.user.orientation = token.orientation;
+          session.user.gender = token.gender;
         }
         return session;
       }
