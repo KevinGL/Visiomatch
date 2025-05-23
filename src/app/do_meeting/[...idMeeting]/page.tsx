@@ -42,10 +42,22 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
 
     useEffect(() =>
     {
-        setInterval(() =>
+        const interval = setInterval(() =>
         {
             setNow(Date.now());
         }, 1000);
+
+        const handleBeforeUnload = () =>
+        {
+            quit();
+        }
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
     }, []);
 
     useEffect(() =>
@@ -54,7 +66,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
         {
             setIsConnected(false);
             setModalEnd(true);
-            quit();//quit(false);
+            quit();
         }
     }, [now]);
 
@@ -416,9 +428,9 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                         isConnected &&
 
                         <>
-                            <div className="flex flex-1 gap-4">
+                            <div className="flex gap-4 mb-2">
                                 <div className="flex-1 flex flex-col">
-                                    <div className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden mb-4">
+                                    <div className="relative aspect-video bg-gray-800 rounded-lg overflow-hidden mx-auto mb-4 lg:w-3/4 w-full">
                                         <div className="absolute inset-0 flex items-center justify-center">
                                             <video
                                                 ref={remoteVideoRef}
@@ -435,7 +447,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                                                 { formatTime((dateDuration - (now - timestamp)) / 1000) }
                                             </div>
                                         }
-                                        <div className="absolute bottom-4 right-4 w-32 h-24 bg-gray-700 rounded-lg overflow-hidden">
+                                        <div className="absolute bottom-4 right-4 lg:w-32 w-24 h-24 bg-gray-700 rounded-lg overflow-hidden">
                                             <video
                                                 ref={localVideoRef}
                                                 loop

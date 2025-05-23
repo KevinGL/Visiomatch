@@ -239,9 +239,21 @@ export const addLike = async (recept: string) =>
 
         const likesRef = db.collection("likes");
 
+        const query = db.collection("likes")
+        .where("emit", "==", session.user.id)
+        .where("recept", "==", recept);
+
+        const snapshot = await query.get();
+
+        if(!snapshot.empty)
+        {
+            return { success: false, message: "Already like" };
+        }
+
         likesRef.add({
             emit: session.user.id,
-            recept
+            recept,
+            date: Date.now()
         });
     }
 

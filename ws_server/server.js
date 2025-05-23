@@ -105,26 +105,31 @@ wss.on('connection', (ws) =>
                 ws
             };
 
-            users.push(user);
+            const indexUser = users.findIndex((u) => u.id === data.userId);
 
-            console.log(`Connection of ${data.name} (${users.length} connected)`);
-
-            const indexOtherUser = users.findIndex((u) => u.idMeeting === user.idMeeting && u.id !== user.id);
-            
-            if(indexOtherUser > -1)
+            if(indexUser === -1)
             {
-                const conversation = { id1: user.id, id2: users[indexOtherUser].id, timestamp: Date.now() };
-                
-                if((data.orientation === "man_woman" && users[indexOtherUser].gender !== user.gender ||
-                   data.orientation !== "man_woman" && users[indexOtherUser].gender === user.gender) &&
-                   conversations.findIndex((c) => conversation.id1 === c.id1 && conversation.id2 === c.id2 || conversation.id1 === c.id2 && conversation.id2 === c.id1) === -1)
-                {
-                    ws.send(JSON.stringify({ type: "speed_dating_open_session", interlocutor: users[indexOtherUser].id, role: "caller", timestamp: conversation.timestamp }));
-                    //users[indexOtherUser].ws.send(JSON.stringify({ type: "speed_dating_open_session", index: users.length - 1, role: "callee" }));
-                    
-                    conversations.push(conversation);
+                users.push(user);
 
-                    console.log(conversation);
+                console.log(`Connection of ${data.name} (${users.length} connected)`);
+
+                const indexOtherUser = users.findIndex((u) => u.idMeeting === user.idMeeting && u.id !== user.id);
+                
+                if(indexOtherUser > -1)
+                {
+                    const conversation = { id1: user.id, id2: users[indexOtherUser].id, timestamp: Date.now() };
+                    
+                    if((data.orientation === "man_woman" && users[indexOtherUser].gender !== user.gender ||
+                    data.orientation !== "man_woman" && users[indexOtherUser].gender === user.gender) &&
+                    conversations.findIndex((c) => conversation.id1 === c.id1 && conversation.id2 === c.id2 || conversation.id1 === c.id2 && conversation.id2 === c.id1) === -1)
+                    {
+                        ws.send(JSON.stringify({ type: "speed_dating_open_session", interlocutor: users[indexOtherUser].id, role: "caller", timestamp: conversation.timestamp }));
+                        //users[indexOtherUser].ws.send(JSON.stringify({ type: "speed_dating_open_session", index: users.length - 1, role: "callee" }));
+                        
+                        conversations.push(conversation);
+
+                        console.log(conversation);
+                    }
                 }
             }
         }
@@ -207,25 +212,28 @@ wss.on('connection', (ws) =>
 
             //console.log(conversations, data.userId);
 
-            const conversNotOver = conversations[indexConversNotOver];
-            let ghosted;
-
-            if(conversNotOver.id1 === data.userId)
+            if(indexConversNotOver > -1)
             {
-                ghosted = conversNotOver.id2;
-            }
+                const conversNotOver = conversations[indexConversNotOver];
+                let ghosted;
 
-            else
-            if(conversNotOver.id2 === data.userId)
-            {
-                ghosted = conversNotOver.id1;
-            }
+                if(conversNotOver.id1 === data.userId)
+                {
+                    ghosted = conversNotOver.id2;
+                }
 
-            const indexGhosted = users.findIndex((u) => u.id === ghosted);
+                else
+                if(conversNotOver.id2 === data.userId)
+                {
+                    ghosted = conversNotOver.id1;
+                }
 
-            if(indexGhosted > -1)
-            {
-                users[indexGhosted].ws.send(JSON.stringify({ type: "speed_dating_ghost", name: data.name }));
+                const indexGhosted = users.findIndex((u) => u.id === ghosted);
+
+                if(indexGhosted > -1)
+                {
+                    users[indexGhosted].ws.send(JSON.stringify({ type: "speed_dating_ghost", name: data.name }));
+                }
             }
         }
     });
