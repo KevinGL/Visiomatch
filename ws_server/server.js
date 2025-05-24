@@ -1,5 +1,5 @@
 import { WebSocketServer } from 'ws';
-import crypto from "crypto";
+import { DateTime } from "luxon";
 
 const wss = new WebSocketServer({ port: process.env.PORT || 8080 });
 
@@ -248,3 +248,19 @@ wss.on('connection', (ws) =>
 });
 
 console.log("Server WebSocket listening");
+
+const checkEndSession = () =>
+{
+    const currentDate = DateTime.now().setZone("Europe/Paris");
+
+    if(currentDate.weekday === 2 || currentDate.weekday === 4 || currentDate.weekday === 7)      //Thursday, Tuesday or Sunday
+    {
+        if(currentDate.hour === 21 && currentDate.minute === 10)       //At 21:10 (End speed dating + latence)
+        {
+            users.length = 0;
+            conversations.length = 0;
+        }
+    }
+};
+
+setInterval(checkEndSession, 5000);

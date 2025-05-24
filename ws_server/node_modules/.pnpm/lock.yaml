@@ -8,11 +8,18 @@ importers:
 
   .:
     dependencies:
+      luxon:
+        specifier: ^3.6.1
+        version: 3.6.1
       ws:
         specifier: ^8.0.0
         version: 8.18.2
 
 packages:
+
+  luxon@3.6.1:
+    resolution: {integrity: sha512-tJLxrKJhO2ukZ5z0gyjY1zPh3Rh88Ej9P7jNrZiHMUXHae1yvI2imgOZtL1TO8TW6biMMKfTtAOoEJANgtWBMQ==}
+    engines: {node: '>=12'}
 
   ws@8.18.2:
     resolution: {integrity: sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==}
@@ -27,5 +34,7 @@ packages:
         optional: true
 
 snapshots:
+
+  luxon@3.6.1: {}
 
   ws@8.18.2: {}

@@ -1,14 +1,14 @@
 {
-    "name": "mon-server-ws",
-    "type": "module",
-    "version": "1.0.0",
-    "main": "server.js",
-    "scripts": {
-      "start": "node server.js",
-      "build": "echo 'No build needed'"
-    },
-    "dependencies": {
-      "ws": "^8.0.0"
-    }
+  "name": "mon-server-ws",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "build": "echo 'No build needed'"
+  },
+  "dependencies": {
+    "luxon": "^3.6.1",
+    "ws": "^8.0.0"
   }
-  
+}
