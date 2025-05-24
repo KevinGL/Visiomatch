@@ -12,7 +12,7 @@ export default function AllowTestMeeting({ children }: { children: React.ReactNo
 
     useEffect(() =>
     {
-        if(status == "unauthenticated")
+        if(status === "unauthenticated")
         {
             router.push("/");
         }
@@ -23,8 +23,10 @@ export default function AllowTestMeeting({ children }: { children: React.ReactNo
             {
                 router.push("/");
             }
+
+            return session ? <>{children}</> : null;
         });
     }, [status, session]);
 
-    return session ? <>{children}</> : null;
+    return <div>Loading ...</div>;
 }

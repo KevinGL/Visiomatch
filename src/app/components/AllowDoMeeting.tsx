@@ -29,6 +29,8 @@ export default function AllowDoMeeting({ children, idMeeting }: any)
                 {
                     router.push("/");
                 }
+
+                return session ? <>{children}</> : null;
             })
             .catch(() =>
             {
@@ -37,10 +39,5 @@ export default function AllowDoMeeting({ children, idMeeting }: any)
         }
     }, [status, router]);
 
-    if (status === "loading")
-    {
-        return <div>Loading...</div>;
-    }
-
-    return session ? <>{children}</> : null;
+    return <div>Loading...</div>;
 }
