@@ -83,9 +83,10 @@ export default function main()
                 className="flex-grow"
               />
             </div>
-            <Button onClick={() =>
+            <Button onClick={async () =>
                 {
-                  checkExists(email).then((res) => setAccountExists(res));
+                  const res: boolean = await checkExists(email);
+                  setAccountExists(res);
                   setStep(1);
                 }} className="w-full bg-pink-600 hover:bg-pink-700 text-white">Suivant</Button>
           </div>
