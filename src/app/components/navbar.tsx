@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import Link from 'next/link'
-import { Heart, User, Search, Menu, DoorOpen } from 'lucide-react'
+import { Heart, User, Search, Menu, DoorOpen, Camera } from 'lucide-react'
 import { useRouter } from "next/navigation";
 import { Button } from '@/components/ui/button'
 import { signOut } from 'next-auth/react';
@@ -13,6 +13,7 @@ export default function Navbar() {
 
   const navItems = [
     { name: 'Matches', callback: () => { router.push("/matchs") }, icon: Heart },
+    { name: 'Tester la caméra', callback: () => { router.push("/test_video") }, icon: Camera },
     { name: 'Se déconnecter', callback: () => signOut(), icon: DoorOpen },
     { name: 'Trouver une séance visio', callback: () => { router.push("/search") }, icon: Search },
   ]
