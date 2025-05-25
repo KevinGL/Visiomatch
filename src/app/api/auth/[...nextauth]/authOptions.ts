@@ -60,6 +60,7 @@ export const authOptions =
                   phoneNumber: credentials?.phoneNumber,
                   birthdate: credentials?.birthdate,
                   admin: false,
+                  description: "",
                   participations: []
                 });
 

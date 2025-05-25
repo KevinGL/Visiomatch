@@ -24,8 +24,8 @@ export default function MessageModal(props)
                         </div>
                     </div>
                     <div className="px-4 py-3 sm:flex sm:flex-row justify-around mt-10 sm:px-6">
-                        <button type="button" onClick={props.setter1} className="mt-3 inline-flex w-full justify-center rounded-md bg-gray-500 px-3 py-2 text-sm font-semibold text-white shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 w-40">{props.msg1}</button>
-                        <button type="button" onClick={props.setter2} className="mt-3 inline-flex w-full justify-center rounded-md bg-pink-500 px-3 py-2 text-sm font-semibold text-white shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 w-40">{props.msg2}</button>
+                        <button type="button" onClick={props.setter1} className="mt-3 inline-flex w-full justify-center rounded-md bg-gray-500 px-3 py-2 text-sm font-semibold text-white shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-400 sm:mt-0 w-40">{props.msg1}</button>
+                        <button type="button" onClick={props.setter2} className="mt-3 inline-flex w-full justify-center rounded-md bg-pink-500 px-3 py-2 text-sm font-semibold text-white shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-pink-400 sm:mt-0 w-40">{props.msg2}</button>
                     </div>
                 </div>
                 </div>

@@ -19,6 +19,7 @@ export default function MiddlewareAdmin({ children }: { children: React.ReactNod
         .then((res: any) =>
         {
             const currentUser = JSON.parse(res);
+            console.log(currentUser);
 
             if(!currentUser.admin)
             {
