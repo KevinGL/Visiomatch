@@ -50,4 +50,28 @@ export const updateProfile = async (req: any) =>
         gender: req.gender,
         search: req.search
     });
+
+    return JSON.stringify(currentUser.data());
+}
+
+export const addImage = async (name: string) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return "";
+    }
+
+    userRef.update({ photos: [ ...currentUser.data().photos, name ] });
+
+    return JSON.stringify(currentUser.data());
 }

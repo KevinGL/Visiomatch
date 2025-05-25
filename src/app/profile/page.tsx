@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { CalendarDays, MapPin, Mail, User, Hash, Globe, Phone, Edit2, Save, Heart } from 'lucide-react'
+import { CldImage } from 'next-cloudinary';
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -12,13 +13,14 @@ import AuthGuard from '../components/AuthGuard'
 import Navbar from '../components/navbar'
 import { useEffect, useState } from 'react'
 import { getProfile } from '../actions/profile/get'
-import { updateProfile } from '../actions/profile/post'
+import { addImage, updateProfile } from '../actions/profile/post'
 import MeetingsList from '../components/meetings-list'
-import { getUserNextMeetings } from '../actions/meetings/get'
+import ImageUploadButton from '../components/ImageUploadButton';
+import { useSession } from 'next-auth/react';
 
 export default function ProfileDisplayEdit() {
-  const [isEditing, setIsEditing] = React.useState(false)
-  const [userData, setUserData] = React.useState({
+  const [isEditing, setIsEditing] = useState(false)
+  const [userData, setUserData] = useState({
     email: 'john.doe@example.com',
     name: 'JohnD',
     dateOfBirth: "01-01-2000",
@@ -28,11 +30,15 @@ export default function ProfileDisplayEdit() {
     phoneNumber: '+1 (555) 123-4567',
     gender: 'male',
     search: 'female',
+    photos: []
   })
+
+  const [images, setImages] = useState([]);
+  const { data: session, status } = useSession();
 
     useEffect(() =>
     {
-        getProfile().then((res: any) =>
+        /*getProfile().then((res: any) =>
         {
             const user = JSON.parse(res);
 
@@ -45,10 +51,80 @@ export default function ProfileDisplayEdit() {
                 country: user.country,
                 phoneNumber: user.phoneNumber,
                 gender: user.gender,
-                search: user.search
+                search: user.search,
+                photos: user.photos
             });
-        });
+        });*/
+
+        const InitDatasUser = async () =>
+        {
+            const res = await getProfile();
+
+            const user = JSON.parse(res);
+
+            setUserData({
+                email: user.email,
+                name: user.name,
+                dateOfBirth: user.birthdate,
+                city: user.city,
+                postalCode: user.zipcode,
+                country: user.country,
+                phoneNumber: user.phoneNumber,
+                gender: user.gender,
+                search: user.search,
+                photos: user.photos
+            });
+        }
+
+        InitDatasUser();
     }, []);
+
+    useEffect(() =>
+    {
+        const handleAddImage = async () =>
+        {
+            try
+            {
+                const file = images[0].file;
+                const formData = new FormData();
+                formData.append("file", file);
+                formData.append("folder", session.user.id);
+                formData.append("upload_preset", "visiomatch_preset");
+
+                const response = await fetch(
+                    "https://api.cloudinary.com/v1_1/druglzlvw/image/upload",
+                    {
+                        method: "POST",
+                        body: formData
+                    }
+                );
+
+                const data = await response.json();
+
+                if (data.secure_url)
+                {
+                    //console.log(data.public_id);
+                    await addImage(data.public_id);
+
+                    const userUpdated = { ...userData };
+                    userUpdated.photos.push(data.public_id);
+
+                    setUserData(userUpdated);
+                }
+            }
+            catch(error)
+            {
+                alert(error);
+            }
+        }
+        
+        if(images.length > 0)
+        {
+            //console.log(images[0]);
+
+            handleAddImage();
+        }
+    }, [images]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -305,7 +381,29 @@ export default function ProfileDisplayEdit() {
                                 </div>
                             </div>
                         )}
-                    </div>
+                    </div>                   
+                </div>
+                <div className="flex flex-start">
+                    {
+                        userData.photos.map((photo: string) =>
+                        {
+                            return(
+                                <CldImage
+                                    src={photo}
+                                    alt={photo}
+                                    width="150"
+                                    height="150"
+                                    crop={{
+                                        type: "auto",
+                                        source: true
+                                    }}
+                                    className="mr-5 rounded-lg"
+                                />
+                            )
+                        })
+                    }
+
+                    <ImageUploadButton images={images} setImage={setImages} />
                 </div>
             </div>
             <MeetingsList />

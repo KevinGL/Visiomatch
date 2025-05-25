@@ -42,4 +42,4 @@ orientations.set("man_man", "Séance visio homme homme");
 orientations.set("woman_woman", "Séance visio femme femme");
 
 export const meetingDuration = 3600000;
-export const dateDuration = 3 * 60 * 1000;
+export const dateDuration = 10 * 60 * 1000;

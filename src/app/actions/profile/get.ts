@@ -33,6 +33,7 @@ export const getProfile = async () =>
         zipcode: currentUser.data()?.zipcode,
         country: currentUser.data()?.country,
         phoneNumber: currentUser.data()?.phoneNumber,
+        photos: currentUser.data()?.photos
     }
 
     return JSON.stringify(res);

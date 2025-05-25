@@ -7,7 +7,7 @@ let users = [];
 let conversations = [];
 let admins = [];
 
-const dateDuration = 3 * 60 * 1000;
+const dateDuration = 10 * 60 * 1000;
 
 wss.on('connection', (ws) =>
 {
@@ -263,4 +263,4 @@ const checkEndSession = () =>
     }
 };
 
-setInterval(checkEndSession, 5000);
+setInterval(checkEndSession, 60000);

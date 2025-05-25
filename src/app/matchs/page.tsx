@@ -86,7 +86,7 @@ export default function Matchs()
                                                                 type: "auto",
                                                                 source: true
                                                             }}
-                                                            className="mr-5"
+                                                            className="mr-5 rounded-lg"
                                                         />
                                                     )
                                                 })
