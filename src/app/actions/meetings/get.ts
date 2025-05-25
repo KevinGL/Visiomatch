@@ -434,7 +434,7 @@ export const getMatchs = async () =>
 
                     //console.log(userId, match.data());
                     
-                    matchs.push({ name: match.data().name, birthdate: match.data().birthdate, city: match.data().city, country: match.data().country, gender: match.data().gender, photos: match.data().photos });
+                    matchs.push({ userId, name: match.data().name, birthdate: match.data().birthdate, city: match.data().city, country: match.data().country, gender: match.data().gender, photos: match.data().photos });
                 }
             }
         }

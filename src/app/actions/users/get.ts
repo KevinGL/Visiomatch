@@ -72,3 +72,48 @@ export const getIfSubscribed = async(meeting: any) =>
 
     return isAlreadyRegistered;
 }
+
+export const getUserMatch = async (id: string) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return false;
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return false;
+    }
+
+    const likesRef = db.collection("likes");
+    const likesDocs = (await likesRef.get()).docs;
+
+    let likes = [];
+
+    likesDocs.map((l) =>
+    {
+        likes.push(l.data());
+    });
+
+    //console.log(likes);
+
+    const index: number = likes.findIndex((l) => l.emit === session.user.id && l.recept === id || l.emit === id && l.recept === session.user.id);
+    //console.log(index);
+
+    if(index === -1)
+    {
+        return "";
+    }
+
+    const matchRef = db.collection("users").doc(id);
+    const match = await matchRef.get();
+
+    //console.log(match.data());
+
+    return JSON.stringify(match.data());
+}
