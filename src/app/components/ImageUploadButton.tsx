@@ -17,14 +17,13 @@ export default function ImageUploadButton(props)
     >
       {({ onImageUpload }) => (
         <div className="flex flex-col items-center space-y-4">
-          {/* Image qui sert de bouton */}
           <img
-            src="/img/icons/icons8-plus-256.png" // Remplace par ton image (dans /public)
+            src="/img/icons/icons8-plus-256.png"
             alt="Upload"
             onClick={onImageUpload}
             className="mr-5 rounded-lg cursor-pointer"
-            width="150"
-            height="150"
+            width="300"
+            height="300"
           />
         </div>
       )}

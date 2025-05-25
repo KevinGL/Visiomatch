@@ -510,7 +510,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                     {
                         modalEnd &&
 
-                        <MessageModal setLike={handleLike} setNoLike={handleNoLike} message="Le temps est écoulé !" />
+                        <MessageModal setter1={handleLike} setter2={handleNoLike} msg1="Like" msg2="No like" message="Le temps est écoulé !" />
                     }
 
                     {

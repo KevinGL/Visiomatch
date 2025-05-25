@@ -3,7 +3,13 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
-//import { metadata } from "@/app/layout";
+import cloudinary from 'cloudinary';
+
+cloudinary.v2.config({
+    cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+    api_key:    process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+    api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET
+})
 
 export const updateProfile = async (req: any) =>
 {
@@ -74,4 +80,73 @@ export const addImage = async (name: string) =>
     userRef.update({ photos: [ ...currentUser.data().photos, name ] });
 
     return JSON.stringify(currentUser.data());
+}
+
+export const deleteImage =  async (id: string) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return "";
+    }
+
+    //console.log(id);
+
+    let photos = currentUser.data().photos;
+    photos.splice(photos.indexOf(id), 1);
+
+    userRef.update({ photos });
+
+    try
+    {
+        const result = await cloudinary.v2.uploader.destroy(id);
+        return JSON.stringify({ success: true, result });
+    }
+    catch (error)
+    {
+        return JSON.stringify({ success: false, error });
+    }
+}
+
+export const sortUserImages = async (idFirst: string) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return "";
+    }
+
+    let photos = currentUser.data().photos;
+    photos.splice(photos.indexOf(idFirst), 1);
+
+    photos = [idFirst, ...photos];
+
+    userRef.update({ photos });
+
+    try
+    {
+        return JSON.stringify(currentUser.data());
+    }
+    catch (error)
+    {
+        return "";
+    }
 }
