@@ -17,6 +17,7 @@ import MeetingsList from '../components/meetings-list'
 import ImageUploadButton from '../components/ImageUploadButton';
 import { useSession } from 'next-auth/react';
 import MessageModal from '../components/messageModal';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function ProfileDisplayEdit() {
   const [isEditing, setIsEditing] = useState(false);
@@ -31,7 +32,8 @@ export default function ProfileDisplayEdit() {
     phoneNumber: '+1 (555) 123-4567',
     gender: 'male',
     search: 'female',
-    photos: []
+    photos: [],
+    describe: ""
   });
 
   const [images, setImages] = useState([]);
@@ -58,7 +60,8 @@ export default function ProfileDisplayEdit() {
                 phoneNumber: user.phoneNumber,
                 gender: user.gender,
                 search: user.search,
-                photos: user.photos
+                photos: user.photos,
+                describe: user.describe
             });
         }
 
@@ -116,7 +119,7 @@ export default function ProfileDisplayEdit() {
         }
     }, [images]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     {
         const { name, value } = e.target
         setUserData(prevData => ({ ...prevData, [name]: value }))
@@ -214,26 +217,26 @@ export default function ProfileDisplayEdit() {
 
                             <div className="mb-6 p-4 bg-pink-50 rounded-lg">
                                 <div className="grid grid-cols-2 gap-4">
-                                <div className="flex items-center">
-                                    <User className="w-5 h-5 text-pink-600 mr-2" />
-                                    <span className="font-semibold">Pseudo:</span>
-                                    <span className="ml-2">{userData.name}</span>
-                                </div>
-                                <div className="flex items-center">
-                                    <CalendarDays className="w-5 h-5 text-pink-600 mr-2" />
-                                    <span className="font-semibold">Age:</span>
-                                    <span className="ml-2">{calculateAge(userData.dateOfBirth)} ans</span>
-                                </div>
-                                <div className="flex items-center">
-                                    <MapPin className="w-5 h-5 text-pink-600 mr-2" />
-                                    <span className="font-semibold">Ville:</span>
-                                    <span className="ml-2">{userData.city}</span>
-                                </div>
-                                <div className="flex items-center">
-                                    <Globe className="w-5 h-5 text-pink-600 mr-2" />
-                                    <span className="font-semibold">Pays:</span>
-                                    <span className="ml-2">{userData.country}</span>
-                                </div>
+                                    <div className="flex items-center">
+                                        <User className="w-5 h-5 text-pink-600 mr-2" />
+                                        <span className="font-semibold">Pseudo:</span>
+                                        <span className="ml-2">{userData.name}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <CalendarDays className="w-5 h-5 text-pink-600 mr-2" />
+                                        <span className="font-semibold">Age:</span>
+                                        <span className="ml-2">{calculateAge(userData.dateOfBirth)} ans</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <MapPin className="w-5 h-5 text-pink-600 mr-2" />
+                                        <span className="font-semibold">Ville:</span>
+                                        <span className="ml-2">{userData.city}</span>
+                                    </div>
+                                    <div className="flex items-center">
+                                        <Globe className="w-5 h-5 text-pink-600 mr-2" />
+                                        <span className="font-semibold">Pays:</span>
+                                        <span className="ml-2">{userData.country}</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -243,92 +246,92 @@ export default function ProfileDisplayEdit() {
                                         <Label htmlFor="email">Adresse email
                                         </Label>
                                         <div className="flex items-center mt-1">
-                                        <Mail className="w-5 h-5 text-gray-400 mr-2" />
-                                        <Input
-                                            id="email"
-                                            name="email"
-                                            type="email"
-                                            required
-                                            value={userData.email}
-                                            onChange={handleInputChange}
-                                            className="flex-grow"
-                                        />
+                                            <Mail className="w-5 h-5 text-gray-400 mr-2" />
+                                            <Input
+                                                id="email"
+                                                name="email"
+                                                type="email"
+                                                required
+                                                value={userData.email}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
                                         </div>
                                     </div>
 
                                     <div>
                                         <Label htmlFor="nickname">Pseudo</Label>
                                         <div className="flex items-center mt-1">
-                                        <User className="w-5 h-5 text-gray-400 mr-2" />
-                                        <Input
-                                            id="nickname"
-                                            name="name"
-                                            required
-                                            value={userData.name}
-                                            onChange={handleInputChange}
-                                            className="flex-grow"
-                                        />
+                                            <User className="w-5 h-5 text-gray-400 mr-2" />
+                                            <Input
+                                                id="nickname"
+                                                name="name"
+                                                required
+                                                value={userData.name}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
                                         </div>
                                     </div>
 
                                     <div>
                                         <Label htmlFor="dateOfBirth">Date de naissance</Label>
                                         <div className="flex items-center mt-1">
-                                        <CalendarDays className="w-5 h-5 text-gray-400 mr-2" />
-                                        <Input
-                                            id="dateOfBirth"
-                                            name="dateOfBirth"
-                                            type="date"
-                                            required
-                                            value={userData.dateOfBirth}
-                                            onChange={handleInputChange}
-                                            className="flex-grow"
-                                        />
+                                            <CalendarDays className="w-5 h-5 text-gray-400 mr-2" />
+                                            <Input
+                                                id="dateOfBirth"
+                                                name="dateOfBirth"
+                                                type="date"
+                                                required
+                                                value={userData.dateOfBirth}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
                                         </div>
                                     </div>
 
                                     <div>
                                         <Label htmlFor="city">Ville</Label>
                                         <div className="flex items-center mt-1">
-                                        <MapPin className="w-5 h-5 text-gray-400 mr-2" />
-                                        <Input
-                                            id="city"
-                                            name="city"
-                                            required
-                                            value={userData.city}
-                                            onChange={handleInputChange}
-                                            className="flex-grow"
-                                        />
+                                            <MapPin className="w-5 h-5 text-gray-400 mr-2" />
+                                            <Input
+                                                id="city"
+                                                name="city"
+                                                required
+                                                value={userData.city}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
                                         </div>
                                     </div>
 
                                     <div>
                                         <Label htmlFor="postalCode">Code postal</Label>
                                         <div className="flex items-center mt-1">
-                                        <Hash className="w-5 h-5 text-gray-400 mr-2" />
-                                        <Input
-                                            id="postalCode"
-                                            name="postalCode"
-                                            required
-                                            value={userData.postalCode}
-                                            onChange={handleInputChange}
-                                            className="flex-grow"
-                                        />
+                                            <Hash className="w-5 h-5 text-gray-400 mr-2" />
+                                            <Input
+                                                id="postalCode"
+                                                name="postalCode"
+                                                required
+                                                value={userData.postalCode}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
                                         </div>
                                     </div>
 
                                     <div>
                                         <Label htmlFor="country">Pays</Label>
                                         <div className="flex items-center mt-1">
-                                        <Globe className="w-5 h-5 text-gray-400 mr-2" />
-                                        <Input
-                                            id="country"
-                                            name="country"
-                                            required
-                                            value={userData.country}
-                                            onChange={handleInputChange}
-                                            className="flex-grow"
-                                        />
+                                            <Globe className="w-5 h-5 text-gray-400 mr-2" />
+                                            <Input
+                                                id="country"
+                                                name="country"
+                                                required
+                                                value={userData.country}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
                                         </div>
                                     </div>
 
@@ -388,6 +391,20 @@ export default function ProfileDisplayEdit() {
                                         </RadioGroup>
                                     </div>
 
+                                    <div>
+                                        <Label htmlFor="nickname">À propos de vous</Label>
+                                        <div className="flex items-center mt-1">
+                                            <User className="w-5 text-gray-400 mr-2" />
+                                            <Textarea
+                                                id="describe"
+                                                name="describe"
+                                                value={userData.describe}
+                                                onChange={handleInputChange}
+                                                className="flex-grow"
+                                            />
+                                        </div>
+                                    </div>
+
                                     <Button type="submit" className="w-full bg-pink-600 hover:bg-pink-700 text-white">
                                         Sauvegarder
                                     </Button>
@@ -418,6 +435,13 @@ export default function ProfileDisplayEdit() {
                                         <Hash className="w-5 h-5 text-pink-600 mr-2" />
                                         <span className="font-semibold">Code postal:</span>
                                         <span className="ml-2">{userData.postalCode}</span>
+                                    </div>
+                                    <div className="flex flex-col">
+                                        <div className="flex items-center mb-4">
+                                            <User className="w-5 h-5 text-pink-600 mr-2" />
+                                            <span className="font-semibold">À propos de vous:</span>
+                                        </div>
+                                        <span className="ml-2">{userData.describe}</span>
                                     </div>
                                 </div>
                             )}

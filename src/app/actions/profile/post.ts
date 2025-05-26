@@ -4,6 +4,7 @@ import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
 import cloudinary from 'cloudinary';
+import { describe } from "node:test";
 
 cloudinary.v2.config({
     cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
@@ -54,7 +55,8 @@ export const updateProfile = async (req: any) =>
         country: req.country,
         phoneNumber: req.phoneNumber,
         gender: req.gender,
-        search: req.search
+        search: req.search,
+        describe: req.describe
     });
 
     return JSON.stringify(currentUser.data());

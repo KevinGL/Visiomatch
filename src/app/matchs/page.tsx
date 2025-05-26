@@ -109,7 +109,7 @@ export default function Matchs()
 
                                             <div className="flex items-center justify-around">
                                                 <Button 
-                                                    onClick={() => router.push(`/matchs/${generateId(match.userId)}`)}
+                                                    onClick={() => router.push(`/users/${generateId(match.userId)}`)}
                                                     className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded"
                                                 >
                                                     Voir son profil

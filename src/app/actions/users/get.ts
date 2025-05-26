@@ -73,6 +73,29 @@ export const getIfSubscribed = async(meeting: any) =>
     return isAlreadyRegistered;
 }
 
+export const getUserFromId = async (id: string) =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return "";
+    }
+
+    const currentUserRef = db.collection("users").doc(session.user.id);
+    const currentUser = await currentUserRef.get();
+
+    if(!currentUser.exists)
+    {
+        return "";
+    }
+
+    const userRef = db.collection("users").doc(id);
+    const user = await userRef.get();
+
+    return JSON.stringify(user.data());
+}
+
 export const getUserMatch = async (id: string) =>
 {
     const session = await getServerSession(authOptions);
@@ -103,17 +126,12 @@ export const getUserMatch = async (id: string) =>
     //console.log(likes);
 
     const index: number = likes.findIndex((l) => l.emit === session.user.id && l.recept === id || l.emit === id && l.recept === session.user.id);
-    //console.log(index);
+    console.log(index);
 
     if(index === -1)
     {
-        return "";
+        return false;
     }
 
-    const matchRef = db.collection("users").doc(id);
-    const match = await matchRef.get();
-
-    //console.log(match.data());
-
-    return JSON.stringify(match.data());
+    return true;
 }

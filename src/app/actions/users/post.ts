@@ -48,7 +48,7 @@ export const genFakesUsers = async () =>
             phoneNumber: faker.phone.number(),
             birthdate: faker.date.birthdate(),
             admin: false,
-            description: "",
+            describe: faker.lorem.paragraph(),
             participations: []
         });
     }

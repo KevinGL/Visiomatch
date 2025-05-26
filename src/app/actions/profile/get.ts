@@ -3,6 +3,7 @@
 import { db } from "@/firebase/config";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../api/auth/[...nextauth]/authOptions";
+import { describe } from "node:test";
 //import { metadata } from "@/app/layout";
 
 export const getProfile = async () =>
@@ -33,7 +34,8 @@ export const getProfile = async () =>
         zipcode: currentUser.data()?.zipcode,
         country: currentUser.data()?.country,
         phoneNumber: currentUser.data()?.phoneNumber,
-        photos: currentUser.data()?.photos
+        photos: currentUser.data()?.photos,
+        describe: currentUser.data()?.describe,
     }
 
     return JSON.stringify(res);
