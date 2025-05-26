@@ -19,6 +19,7 @@ export default function DisplayUser(params)
     const [userData, setUserData] = useState(null);
     const [isMatch, setIsMatch] = useState<boolean>(false);
     const [displayPhotos, setDisplayPhotos] = useState<boolean>(false);
+    const [indexPhotoToDisplay, setIndexPhotoToDisplay] = useState<number>(-1);
     const router = useRouter();
 
     useEffect(() =>
@@ -131,7 +132,7 @@ export default function DisplayUser(params)
                                             isMatch &&
 
                                             <Button
-                                                onClick={() => {}}
+                                                onClick={() => router.push(`/talks/${params.params.id[0]}`)}
                                                 className="bg-pink-600 hover:bg-pink-700 text-white"
                                                 >
                                                 <MessageCircle className="mr-2 h-4 w-4" />
@@ -180,7 +181,7 @@ export default function DisplayUser(params)
                     }
 
                     {
-                        displayPhotos &&
+                        (displayPhotos && indexPhotoToDisplay === -1) &&
 
                         <div className="container mx-auto p-4">
                             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
@@ -193,7 +194,66 @@ export default function DisplayUser(params)
                                         Retour sur profil
                                     </Button>
                                     
-                                    <Carousel images={userData.photos} />
+                                    
+                                    <div className="flex flex-wrap justify-center gap-6">
+                                    {
+                                        userData.photos.map((photo: string, index: number) =>
+                                        {
+                                            return(
+                                                <>
+                                                    <div className="relative">
+                                                        <CldImage
+                                                            src={photo}
+                                                            alt={photo}
+                                                            width="300"
+                                                            height="300"
+                                                            crop={{
+                                                                type: "auto",
+                                                                source: true
+                                                            }}
+                                                            onClick={() => setIndexPhotoToDisplay(index)}
+                                                            className="rounded-lg cursor-pointer"
+                                                        />
+                                                    </div>
+                                                </>
+                                            )
+                                        })
+                                    }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    {
+                        (displayPhotos && indexPhotoToDisplay !== -1) &&
+
+                        <div className="container mx-auto p-4">
+                            <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                                <div className="p-6 px-auto">
+                                    <Button
+                                        onClick={() => setIndexPhotoToDisplay(-1)}
+                                        className="bg-pink-600 hover:bg-pink-700 text-white mb-6"
+                                        >
+                                        <Camera className="mr-2 h-4 w-4" />
+                                        Retour sur photos
+                                    </Button>
+                                    
+                                    <div className="flex flex-wrap justify-center gap-6">
+
+                                        <CldImage
+                                            src={userData.photos[indexPhotoToDisplay]}
+                                            alt={userData.photos[indexPhotoToDisplay]}
+                                            width="800"
+                                            height="800"
+                                            crop={{
+                                                type: "auto",
+                                                source: true
+                                            }}
+                                            className="rounded-lg w-full"
+                                        />
+
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -7,6 +7,8 @@ let users = [];
 let conversations = [];
 let admins = [];
 
+let usersTalk = [];
+
 const dateDuration = 10 * 60 * 1000;
 
 wss.on('connection', (ws) =>
@@ -234,6 +236,30 @@ wss.on('connection', (ws) =>
                 {
                     users[indexGhosted].ws.send(JSON.stringify({ type: "speed_dating_ghost", name: data.name }));
                 }
+            }
+        }
+
+        else
+        if(data.type === "talk_connect")
+        {
+            const index = usersTalk.findIndex((u) => u.id === data.id);
+            
+            if(index === -1)
+            {
+                usersTalk.push({ id: data.id, ws });
+            }
+        }
+
+        else
+        if(data.type === "talk")
+        {
+            //console.log(data);
+
+            const index = usersTalk.findIndex((u) => u.id === data.interlocutorId);
+
+            if(index !== -1)
+            {
+                usersTalk[index].ws.send(JSON.stringify({ type: "talk_res", author: data.id, content: data.content }));
             }
         }
     });

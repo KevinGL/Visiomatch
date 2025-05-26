@@ -126,7 +126,7 @@ export const getUserMatch = async (id: string) =>
     //console.log(likes);
 
     const index: number = likes.findIndex((l) => l.emit === session.user.id && l.recept === id || l.emit === id && l.recept === session.user.id);
-    console.log(index);
+    //console.log(index);
 
     if(index === -1)
     {
