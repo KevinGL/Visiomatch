@@ -191,6 +191,7 @@ wss.on('connection', (ws) =>
             const indexConversNotOver = conversations.findIndex((c) => (c.id1 === data.userId || c.id2 === data.userId) && Date.now() - c.timestamp < dateDuration);
 
             //console.log(conversations, data.userId);
+            //console.log(indexConversNotOver);
 
             if(indexConversNotOver > -1)
             {
@@ -212,9 +213,18 @@ wss.on('connection', (ws) =>
 
                 if(indexGhosted > -1)
                 {
-                    users[indexGhosted].ws.send(JSON.stringify({ type: "speed_dating_ghost", name: data.name }));
+                    users[indexGhosted].ws.send(JSON.stringify({ type: "speed_dating_ghost" }));
                 }
             }
+
+            const indexConversation = conversations.findIndex((c) => c.id1 === data.userId || c.id2 === data.userId);
+            
+            if(indexConversation > -1)
+            {
+                conversations.splice(indexConversation, 1);
+            }
+
+            //console.log(conversations);
         }
 
         //////////////////////////////
@@ -265,7 +275,7 @@ wss.on('connection', (ws) =>
         if(data.type === "talk_off")
         {
             usersTalk = usersTalk.filter((u) => u.id !== data.id);
-            //console.log(`Disconnect of ${data.id}, ${usersTalk.length} connected`);
+            console.log(`Disconnect of ${data.id}, ${usersTalk.length} connected`);
         }
     });
 });

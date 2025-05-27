@@ -29,7 +29,6 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     const [now, setNow] = useState(Date.now());
     const [modalEnd, setModalEnd] = useState<boolean>(false);
     const [modalGhost, setModalGhost] = useState<boolean>(false);
-    const [nameGhost, setNameGhost] = useState<string>("");
     
     const socketRef = useRef<WebSocket | null>(null);
     const localVideoRef = useRef(null);
@@ -37,6 +36,9 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
     const roleRef = useRef<string>("callee");
     const streamRef = useRef<MediaStream>(null);
+
+    const userIdRef = useRef<string>("");
+    const usernameRef = useRef<string>("");
 
     const { data: session, status } = useSession();
 
@@ -47,16 +49,16 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             setNow(Date.now());
         }, 1000);
 
-        const handleBeforeUnload = () =>
-        {
-            quit();
-        }
-
-        window.addEventListener("beforeunload", handleBeforeUnload);
-
         return () => {
             clearInterval(interval);
-            window.removeEventListener("beforeunload", handleBeforeUnload);
+            
+            if(socketRef.current)
+            {
+                //socketRef.current.send(JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting }));
+                //socketRef.current.send(JSON.stringify({ type: "speed_dating_off", id: "K8yfT2QqeF5fyiVAIjto", name: "Vinke013", idMeeting }));
+                socketRef.current.send(JSON.stringify({ type: "speed_dating_off", userId: userIdRef.current, name: usernameRef.current, idMeeting }));
+                socketRef.current.close();
+            }
         };
     }, []);
 
@@ -122,6 +124,9 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                 //console.log(session.user);
     
                 const message: string = JSON.stringify({ type: "speed_dating_on", userId: session.user.id, name: session.user.name, orientation: (session.user as any).orientation, gender: (session.user as any).gender, idMeeting });
+
+                userIdRef.current = session.user.id;
+                usernameRef.current = session.user.name;
             
                 socketRef.current.send(message);
             };
@@ -146,11 +151,6 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     {
         setIsConnected(false);
             
-        /*if(disconnect)
-        {
-            closeConnection();
-        }*/
-
         const message: string = JSON.stringify({ type: "speed_dating_off", userId: session.user.id, name: session.user.name, idMeeting });
     
         if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
@@ -413,7 +413,6 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             {
                 quit();
                 setModalGhost(true);
-                setNameGhost(resParsed.name);
             }
         }
     }
@@ -516,7 +515,7 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
                     {
                         modalGhost &&
 
-                        <AlertModal message={`${nameGhost} s'est déconnecté(e)`} onClose={() => {setModalGhost(false); setNameGhost("")}} />
+                        <AlertModal message="Votre interlocuteur s'est déconnecté(e)" onClose={() => {setModalGhost(false)}} />
                     }
 
                 </div>

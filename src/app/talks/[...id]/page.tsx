@@ -57,7 +57,7 @@ export default function Talk(params)
             {
                 //console.log("Closing WebSocket...");
                 socketRef.current.send(JSON.stringify({ type: "talk_off", id: session.user.id }));
-                //socketRef.current.close();
+                socketRef.current.close();
             }
         };
     }, []);
