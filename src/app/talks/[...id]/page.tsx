@@ -25,6 +25,8 @@ export default function Talk(params)
     const router = useRouter();
     const { data: session, status } = useSession();
     const socketRef = useRef(null);
+
+    const userIdRef = useRef<string>("");
     
     useEffect(() =>
     {
@@ -56,31 +58,31 @@ export default function Talk(params)
             if(socketRef.current)
             {
                 //console.log("Closing WebSocket...");
-                socketRef.current.send(JSON.stringify({ type: "talk_off", id: session.user.id }));
+                socketRef.current.send(JSON.stringify({ type: "talk_off", id: userIdRef }));
                 socketRef.current.close();
             }
         };
     }, []);
 
     useEffect(() =>
+    {
+        const handleBeforeUnload = () =>
         {
-            const handleBeforeUnload = () =>
+            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
             {
-                if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
-                {
-                    socketRef.current.send(JSON.stringify({ type: "talk_off", id: session.user.id }));
-                    socketRef.current.close();
-                    socketRef.current = null;
-                }
-            };
-    
-            window.addEventListener("beforeunload", handleBeforeUnload);
-    
-            return () =>
-            {
-                window.removeEventListener("beforeunload", handleBeforeUnload);
-            };
-        }, []);
+                socketRef.current.send(JSON.stringify({ type: "talk_off", id: userIdRef.current }));
+                socketRef.current.close();
+                socketRef.current = null;
+            }
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () =>
+        {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, []);
 
     useEffect(() =>
     {
@@ -89,6 +91,8 @@ export default function Talk(params)
             socketRef.current.onopen = () =>
             {
                 socketRef.current.send(JSON.stringify({ type: "talk_connect", id: session.user.id }));
+
+                userIdRef.current = session.user.id;
             }
 
             socketRef.current.onmessage = async (res) =>
@@ -123,9 +127,9 @@ export default function Talk(params)
     {
         if(messageToSend !== "")
         {
-            const res: string = await sendMessage(messageToSend, decodeId(params.params.id[0])[0]);
+            //const res: string = await sendMessage(messageToSend, decodeId(params.params.id[0])[0]);
 
-            if(JSON.parse(res).success)
+            //if(JSON.parse(res).success)
             {
                 setMessageToSend("");
 
@@ -139,7 +143,9 @@ export default function Talk(params)
                 }
             }
 
-            else
+            const res: string = await sendMessage(messageToSend, decodeId(params.params.id[0])[0]);
+
+            if(!JSON.parse(res).success)
             {
                 setMessageModal(JSON.parse(res).message);
             }

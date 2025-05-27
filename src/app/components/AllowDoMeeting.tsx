@@ -6,8 +6,6 @@ import { meetingDuration, orientations } from "../api/variables/meetings";
 
 export default function AllowDoMeeting({ children, idMeeting }: any)
 {
-    return children;
-    
     const { data: session, status } = useSession();
     const router = useRouter();
 
