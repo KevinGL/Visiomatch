@@ -63,6 +63,26 @@ export default function Talk(params)
     }, []);
 
     useEffect(() =>
+        {
+            const handleBeforeUnload = () =>
+            {
+                if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
+                {
+                    socketRef.current.send(JSON.stringify({ type: "talk_off", id: session.user.id }));
+                    socketRef.current.close();
+                    socketRef.current = null;
+                }
+            };
+    
+            window.addEventListener("beforeunload", handleBeforeUnload);
+    
+            return () =>
+            {
+                window.removeEventListener("beforeunload", handleBeforeUnload);
+            };
+        }, []);
+
+    useEffect(() =>
     {
         if(session && socketRef.current)
         {

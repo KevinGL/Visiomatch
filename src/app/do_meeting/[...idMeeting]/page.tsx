@@ -54,13 +54,45 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
             
             if(socketRef.current)
             {
-                //socketRef.current.send(JSON.stringify({ type: "speed_dating_off", id: session.user.id, name: session.user.name, idMeeting }));
-                //socketRef.current.send(JSON.stringify({ type: "speed_dating_off", id: "K8yfT2QqeF5fyiVAIjto", name: "Vinke013", idMeeting }));
-                socketRef.current.send(JSON.stringify({ type: "speed_dating_off", userId: userIdRef.current, name: usernameRef.current, idMeeting }));
-                socketRef.current.close();
+                /*socketRef.current.send(JSON.stringify({ type: "speed_dating_off", userId: userIdRef.current, name: usernameRef.current, idMeeting }));
+                socketRef.current.close();*/
+
+                quit();
             }
         };
     }, []);
+
+    useEffect(() =>
+    {
+	    const handleBeforeUnload = () =>
+        {
+            if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
+            {
+                const message = JSON.stringify({
+                    type: "speed_dating_off",
+                    userId: userIdRef.current,
+                    name: usernameRef.current,
+                    idMeeting,
+                });
+                socketRef.current.send(message);
+                socketRef.current.close();
+                socketRef.current = null;
+            }
+
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop());
+                streamRef.current = null;
+            }
+        };
+
+	    window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () =>
+        {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, []);
+
 
     useEffect(() =>
     {
@@ -151,7 +183,8 @@ export default function VideoConference({ params }: { params: { idMeeting: strin
     {
         setIsConnected(false);
             
-        const message: string = JSON.stringify({ type: "speed_dating_off", userId: session.user.id, name: session.user.name, idMeeting });
+        //const message: string = JSON.stringify({ type: "speed_dating_off", userId: session.user.id, name: session.user.name, idMeeting });
+        const message: string = JSON.stringify({ type: "speed_dating_off", userId: userIdRef.current, name: usernameRef.current, idMeeting });
     
         if(socketRef.current && socketRef.current.readyState === WebSocket.OPEN)
         {
