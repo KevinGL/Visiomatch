@@ -8,6 +8,7 @@ export default function AllowDoMeeting({ children, idMeeting }: any)
 {
     const { data: session, status } = useSession();
     const router = useRouter();
+    const [valueReturn, setValueReturn] = useState(<>Loading ...</>);
 
     useEffect(() =>
     {
@@ -30,7 +31,10 @@ export default function AllowDoMeeting({ children, idMeeting }: any)
                     router.push("/");
                 }
 
-                return session ? <>{children}</> : null;
+                else
+                {
+                    setValueReturn(children);
+                }
             })
             .catch(() =>
             {
@@ -39,5 +43,5 @@ export default function AllowDoMeeting({ children, idMeeting }: any)
         }
     }, [status, router]);
 
-    return <div>Loading...</div>;
+    return valueReturn;
 }

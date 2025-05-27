@@ -2,7 +2,7 @@
 
 import * as React from 'react'
 import {useState, useEffect, useRef} from 'react'
-import AllowTestMeeting from '../components/AllowTestMeeting'
+import MiddlewareAdmin from '../components/MiddlewareAdmin'
 import Navbar from '../components/navbar'
 import { Button } from '@/components/ui/button'
 import { MessageSquare, Mic, MicOff, Phone, Video, VideoOff } from 'lucide-react'
@@ -305,7 +305,7 @@ export default function TestMeeting()
     }
     
     return (
-        <AllowTestMeeting>
+        <MiddlewareAdmin>
             <div className="min-h-screen bg-pink-50">
                 <Navbar />
                 <div className="container mx-auto p-4 h-screen flex flex-col">
@@ -387,6 +387,6 @@ export default function TestMeeting()
                     }
                 </div>
             </div>
-        </AllowTestMeeting>
+        </MiddlewareAdmin>
     )
 }
