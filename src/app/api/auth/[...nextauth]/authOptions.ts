@@ -66,7 +66,7 @@ export const authOptions =
 
                 const orientation = getOrientation(credentials?.gender, credentials?.search);
   
-                return { id: newUser.id, email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate, name: credentials?.name, orientation };
+                return { id: newUser.id, email: credentials?.email, gender: credentials?.gender, search: credentials?.search, birthdate: credentials?.birthdate, name: credentials?.name, orientation, admin: false };
           }
   
           else
@@ -81,7 +81,7 @@ export const authOptions =
 
           const orientation = getOrientation(user.gender, user.search);
   
-          return { id: user.id, email: user.email, gender: user.gender, search: user.search, birthdate: user.birthdate, name: user.name, orientation };
+          return { id: user.id, email: user.email, gender: user.gender, search: user.search, birthdate: user.birthdate, name: user.name, orientation, admin: user.admin };
         },
       }),
     ],
@@ -89,26 +89,26 @@ export const authOptions =
     callbacks: {
       async jwt({ token, user }: { token: JWT, user?: any })
       {
-        // Si l'utilisateur est authentifié, ajouter l'id dans le token JWT
         if (user)
         {
-          token.id = user.id;  // Ajouter l'id de l'utilisateur dans le JWT
+          token.id = user.id;
           token.name = user.name;
           token.orientation = user.orientation;
           token.gender = user.gender;
+          token.admin = user.admin;
         }
         return token;
       },
   
       async session({ session, token }: { session: any, token: JWT })
       {
-        // Ajouter l'id de l'utilisateur à la session depuis le token JWT
         if (token?.id)
         {
-          session.user.id = token.id;  // Ajouter l'id dans les données de session
+          session.user.id = token.id;
           session.user.name = token.name;
           session.user.orientation = token.orientation;
           session.user.gender = token.gender;
+          session.user.admin = token.admin;
         }
         return session;
       }

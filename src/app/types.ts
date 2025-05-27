@@ -27,7 +27,8 @@ export interface Session
 
 declare module "next-auth" {
     interface User {
-      id: string; // Ajoutez d'autres propriétés si nécessaire
+      id: string;
+      admin: boolean
     }
   
     interface Session {

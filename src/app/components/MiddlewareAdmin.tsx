@@ -13,15 +13,15 @@ export default function AllowTestMeeting({ children }: { children: React.ReactNo
 
     useEffect(() =>
     {
+        //console.log(session, status);
+        
         if(status === "unauthenticated")
         {
             router.push("/");
         }
 
-        /*const getUser = async () =>
+        /*getCurrentUser().then((res: string) =>
         {
-            const res: string = await getCurrentUser();
-            
             if(!JSON.parse(res).admin)
             {
                 router.push("/");
@@ -30,23 +30,22 @@ export default function AllowTestMeeting({ children }: { children: React.ReactNo
             else
             {
                 setValueReturn(<>{children}</>);
+            }
+        });*/
+
+        else
+        if(status === "authenticated")
+        {
+            if(session.user.admin)
+            {
+                setValueReturn(<>{children}</>);
+            }
+
+            else
+            {
+                router.push("/");
             }
         }
-
-        getUser();*/
-
-        getCurrentUser().then((res: string) =>
-        {
-            if(!JSON.parse(res).admin)
-            {
-                router.push("/");
-            }
-
-            else
-            {
-                setValueReturn(<>{children}</>);
-            }
-        });
     }, [status, session]);
 
     return valueReturn;

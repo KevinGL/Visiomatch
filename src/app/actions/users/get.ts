@@ -135,3 +135,45 @@ export const getUserMatch = async (id: string) =>
 
     return true;
 }
+
+export const getAllUsers = async () =>
+{
+    const session = await getServerSession(authOptions);
+    
+    if(!session)
+    {
+        return JSON.stringify({ success: false, message: "Unauthenticated" });
+    }
+
+    const userRef = db.collection("users").doc(session.user.id);
+    const currentUser = await userRef.get();
+
+    if(!currentUser.exists)
+    {
+        return JSON.stringify({ success: false, message: "User does not exist" });
+    }
+
+    if(!currentUser.data().admin)
+    {
+        return JSON.stringify({ success: false, message: "Not admin" });
+    }
+
+    const usersRef = db.collection("users");
+
+    let users = [];
+
+    (await usersRef.get()).docs.map((user) =>
+    {
+        users.push({
+            id: user.data().id,
+            birthdate: user.data().birthdate,
+            city: user.data().city,
+            country: user.data().country,
+            createdAt: user.data().createdAt,
+            gender: user.data().gender,
+            search: user.data().search
+        });
+    });
+
+    return JSON.stringify({ success: true, users });
+}
