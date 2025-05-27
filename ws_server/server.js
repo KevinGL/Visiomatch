@@ -181,28 +181,6 @@ wss.on('connection', (ws) =>
             }
         }
 
-        /*else
-        if(data.type === "speed_dating_like")
-        {
-            const like = { emit: data.userId, recept: data.interlocutor, value: data.value, ws };
-            
-            likes.push(like);
-
-            //console.log(likes);
-
-            const indexLike = likes.findIndex((l) => (l.emit === like.recept || l.recept === like.emit) && like.value && l.value);
-
-            let match = false;
-
-            if(indexLike > -1)
-            {
-                //console.log("Match");
-                match = true;
-            }
-
-            ws.send(JSON.stringify({ type: "speed_dating_match", match: match ? data.interlocutor : "" }));
-        }*/
-
         else
         if(data.type === "speed_dating_off")
         {
@@ -239,6 +217,11 @@ wss.on('connection', (ws) =>
             }
         }
 
+        //////////////////////////////
+        //////////////////////////////
+        //////////////////////////////
+        //////////////////////////////
+
         else
         if(data.type === "talk_connect")
         {
@@ -246,7 +229,7 @@ wss.on('connection', (ws) =>
             
             if(index === -1)
             {
-                usersTalk.push({ id: data.id, ws });
+                usersTalk.push({ id: data.id, ws, lastPing: Date.now() });
             }
         }
 
@@ -257,19 +240,33 @@ wss.on('connection', (ws) =>
 
             const index = usersTalk.findIndex((u) => u.id === data.interlocutorId);
 
+            //console.log(`${data.interlocutorId} => ${index}`);
+
             if(index !== -1)
             {
                 usersTalk[index].ws.send(JSON.stringify({ type: "talk_res", author: data.id, content: data.content }));
+                usersTalk[index].lastPing = Date.now();
             }
         }
-    });
 
-    ws.on('close', () =>
-    {
-        /*if (waitingUser === ws)
+        /*else
+        if(data.type === "talk_ping")
         {
-            waitingUser = null; // Libérer la place si l'utilisateur quitte avant le match
+            const index = usersTalk.findIndex((u) => u.id === data.id);
+
+            if(index !== -1)
+            {
+                usersTalk[index].lastPing = Date.now();
+                console.log(`Ping of ${data.id}`);
+            }
         }*/
+
+        else
+        if(data.type === "talk_off")
+        {
+            usersTalk = usersTalk.filter((u) => u.id !== data.id);
+            //console.log(`Disconnect of ${data.id}, ${usersTalk.length} connected`);
+        }
     });
 });
 
@@ -289,4 +286,19 @@ const checkEndSession = () =>
     }
 };
 
+/*const checkUserTalking = () =>
+{
+    for(let i = usersTalk.length - 1 ; i > -1; i--)
+    {
+        //if(Date.now() - usersTalk[i].lastPing > 5 * 60 * 1000)
+        if(Date.now() - usersTalk[i].lastPing > 10000)
+        {
+            console.log(`Disconnect ${usersTalk[i].id}`);
+            usersTalk.splice(i, 1);
+        }
+    }
+}*/
+
 setInterval(checkEndSession, 60000);
+//setInterval(checkUserTalking, 5 * 60 * 1000);
+//setInterval(checkUserTalking, 5000);

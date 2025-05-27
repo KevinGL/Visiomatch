@@ -12,6 +12,7 @@ import { getUserFromId } from "@/app/actions/users/get";
 import { useSession } from "next-auth/react";
 import { Textarea } from "@/components/ui/textarea";
 import { sendMessage } from "@/app/actions/talks/post";
+import AlertModal from "@/app/components/alertModal";
 
 export default function Talk(params)
 {
@@ -19,6 +20,7 @@ export default function Talk(params)
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [interlocutorName, setInterlocutorName] = useState<string>("");
     const [messageToSend, setMessageToSend] = useState<string>("");
+    const [messageModal, setMessageModal] = useState<string>("");
 
     const router = useRouter();
     const { data: session, status } = useSession();
@@ -49,6 +51,15 @@ export default function Talk(params)
         }
 
         getTalkFromInterlocutor();
+
+        return () => {
+            if(socketRef.current)
+            {
+                //console.log("Closing WebSocket...");
+                socketRef.current.send(JSON.stringify({ type: "talk_off", id: session.user.id }));
+                //socketRef.current.close();
+            }
+        };
     }, []);
 
     useEffect(() =>
@@ -78,6 +89,13 @@ export default function Talk(params)
                     }
                 }
             }
+
+            ///////////////////////////////////////////
+
+            /*setInterval(() =>
+            {
+                socketRef.current.send(JSON.stringify({ type: "talk_ping", id: session.user.id }));
+            }, 5000);*/
         }
     }, [session, socketRef.current]);
 
@@ -85,9 +103,9 @@ export default function Talk(params)
     {
         if(messageToSend !== "")
         {
-            //const res: string = await sendMessage(messageToSend, decodeId(params.params.id[0])[0]);
+            const res: string = await sendMessage(messageToSend, decodeId(params.params.id[0])[0]);
 
-            //if(JSON.parse(res).success)
+            if(JSON.parse(res).success)
             {
                 setMessageToSend("");
 
@@ -101,7 +119,10 @@ export default function Talk(params)
                 }
             }
 
-            await sendMessage(messageToSend, decodeId(params.params.id[0])[0]);
+            else
+            {
+                setMessageModal(JSON.parse(res).message);
+            }
         }
     }
 
@@ -179,6 +200,13 @@ export default function Talk(params)
                             </div>
                         </div>
                     </div>
+
+                    {
+                        messageModal !== "" &&
+
+                        <AlertModal message={messageModal} onClose={() => setMessageModal("")} />
+                    }
+
                 </div>
             }
         </AuthGuard>
